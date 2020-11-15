@@ -1,4 +1,4 @@
-""" Download and report changes in multiple website robots.txt files."""
+""" Monitor and report changes across multiple website robots.txt files."""
 # TODO: Complete core functionality
 # TODO: Write tests and fix bugs
 # TODO: Provide more details about changes using difflib
