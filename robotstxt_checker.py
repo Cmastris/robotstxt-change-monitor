@@ -34,9 +34,9 @@ class RunChecks:
             print("Robots.txt checked: " + check.url)
             # TODO: Init appropriate report subclass based on check attributes
             if check.err_message:
-                pass
+                report = ErrorReport(check, name, email)
             elif check.first_run:
-                pass
+                report = FirstRunReport(check, name, email)
             elif check.file_change:
                 report = ChangeReport(check, name, email)
             else:
@@ -120,7 +120,6 @@ class Report:
         email (str): the email address of the owner, who will receive alerts.
     """
     # TODO: complete class and method documentation
-    # TODO: Create subclasses for no change, change, first run, and error
     # TODO: Move file_change, first_run, and err_message attributes to subclasses
     # TODO: Add method to get date/time
     # TODO: Add methods to print results to the console
@@ -156,6 +155,20 @@ class ChangeReport(Report):
         Report.__init__(self, website, name, email)  # TODO: Change to use super
         self.old_content = website.old_content
         self.new_content = website.new_content
+
+
+class FirstRunReport(Report):
+    # TODO: Complete documentation and add methods
+    def __init__(self, website, name, email):
+        Report.__init__(self, website, name, email)  # TODO: Change to use super
+        self.new_content = website.new_content
+
+
+class ErrorReport(Report):
+    # TODO: Complete documentation and add methods
+    def __init__(self, website, name, email):
+        Report.__init__(self, website, name, email)  # TODO: Change to use super
+        self.err_message = website.err_message
 
 
 if __name__ == "__main__":
