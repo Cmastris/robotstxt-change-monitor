@@ -18,8 +18,8 @@ monitored_sites = [
 master_log = None
 
 
-class ManageWebsiteChecks:
-    """Manages all monitored website checks."""
+class RunChecks:
+    """Run robots.txt checks across websites."""
     # TODO: complete class and method documentation
 
     def __init__(self, sites):
@@ -112,7 +112,7 @@ class RobotsCheck:
         pass
 
 
-class WebsiteReport:
+class Report:
     """Reports the robots.txt check result for a single website.
 
     Attributes:
@@ -145,25 +145,19 @@ class WebsiteReport:
         return self
 
 
-class NoChangeReport(WebsiteReport):
+class NoChangeReport(Report):
     # TODO: Complete documentation and add methods
     def __init__(self, website, name, email):
-        WebsiteReport.__init__(self, website, name, email)  # TODO: Change to use super
+        Report.__init__(self, website, name, email)  # TODO: Change to use super
 
 
-class ChangeReport(WebsiteReport):
+class ChangeReport(Report):
     # TODO: Complete documentation and add methods
     def __init__(self, website, name, email):
-        WebsiteReport.__init__(self, website, name, email)  # TODO: Change to use super
+        Report.__init__(self, website, name, email)  # TODO: Change to use super
         self.old_content = website.old_content
         self.new_content = website.new_content
 
 
-def run_checks():
-    """Initialise and check all robots.txt files for changes since last run."""
-    ManageWebsiteChecks(monitored_sites).check_all()
-
-
 if __name__ == "__main__":
-    print("__name__ equals __main__")
-    run_checks()
+    RunChecks(monitored_sites).check_all()
