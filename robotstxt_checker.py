@@ -124,7 +124,7 @@ class Report:
     # TODO: Add methods to print results to the console
     # TODO: Add methods to update the master log
     # TODO: Add methods to update the website log
-    # TODO: Add methods to send an email report
+    # TODO: Add methods to write an email report
 
     def __init__(self, website, name, email):
         self.url = website.url
@@ -137,6 +137,10 @@ class Report:
         # Update the master log
         print("Method create_reports called.")
         return self
+
+    def send_email(self, subject, body):
+        # Email content generated in subclasses
+        pass
 
 
 class NoChangeReport(Report):
