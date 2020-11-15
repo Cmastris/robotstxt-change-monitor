@@ -120,7 +120,6 @@ class Report:
         email (str): the email address of the owner, who will receive alerts.
     """
     # TODO: complete class and method documentation
-    # TODO: Move file_change, first_run, and err_message attributes to subclasses
     # TODO: Add method to get date/time
     # TODO: Add methods to print results to the console
     # TODO: Add methods to update the master log
@@ -129,9 +128,6 @@ class Report:
 
     def __init__(self, website, name, email):
         self.url = website.url
-        self.file_change = website.file_change
-        self.first_run = website.first_run
-        self.err_message = website.err_message
         self.name = name
         self.email = email
 
