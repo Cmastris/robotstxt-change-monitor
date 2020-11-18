@@ -49,7 +49,7 @@ class RunChecks:
 
 
 class RobotsCheck:
-    """Checks the robots.txt file of a single website.
+    """Check a website's robots.txt file and compare to the previous recorded file.
 
     This class is used to download the robots.txt file, update the robots.txt records
     (current file and file downloaded during the previous run), and check for
@@ -58,9 +58,15 @@ class RobotsCheck:
 
     Attributes:
         url (str): the absolute URL of the website homepage, with a trailing slash.
-        first_run (): if this is the first check of the website's file.
+        err_message (None, str): None by default, otherwise a description of the error.
+        file_change (bool): if the robots.txt file has changed since the previous record.
+        first_run (bool): if this is the first recorded check of the website's file.
+        old_file (str): the file containing the previous check robots.txt content.
+        old_content (str): the previous check robots.txt content.
+        new_file (str): the file containing the latest check robots.txt content.
+        old_content (str): the latest check robots.txt content.
+
     """
-    # TODO: complete class and method documentation
 
     def __init__(self, url):
         self.url = url
@@ -76,7 +82,11 @@ class RobotsCheck:
         self.new_content = "test new content"
 
     def run_check(self):
-        """Update robots.txt records and check for changes."""
+        """Update the robots.txt file records and check for changes.
+
+        Returns:
+            The class instance representing the completed robots.txt check.
+        """
         print("Method run_check called.")
         try:
             extraction = self.download_robotstxt()
@@ -91,23 +101,37 @@ class RobotsCheck:
         return self
 
     def download_robotstxt(self):
-        """Extract the contents of the current robots.txt file."""
+        """Extract and return the current content (str) of the robots.txt file."""
+        # TODO: complete method
         # Use Beautiful Soup or Requests
         # Raise any HTTP/extraction errors
         return "Test extraction"
 
     def update_records(self, new_extraction):
-        """Update the robots.txt record files."""
+        """Update the files containing the current and previous robots.txt content.
+
+        If the robots.txt file has been checked previously (first_run=False),
+        overwrite old_file with the contents of new_file (from the previous check).
+        Then, add the new robots.txt extraction content to new_file.
+
+        Args:
+            new_extraction (str): the current content of the robots.txt file.
+
+        """
+        # TODO: complete method
         if not self.first_run:
             # Copy the contents of new_file and overwrite the contents of old_file
+            # Update old_content
             pass
 
         # Overwrite the contents of new_file with new_extraction
+        # Update new_content
         pass
 
     def check_diff(self):
-        """Check for differences between the old and new file."""
+        """Check for file differences and update self.file_change."""
         # Check for differences and set self.file_change to True if change
+        # TODO: complete method
         pass
 
 
