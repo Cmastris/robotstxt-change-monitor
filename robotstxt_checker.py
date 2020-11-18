@@ -130,9 +130,8 @@ class RobotsCheck:
 
     def check_diff(self):
         """Check for file differences and update self.file_change."""
-        # Check for differences and set self.file_change to True if change
-        # TODO: complete method
-        pass
+        if self.old_content != self.new_content:
+            self.file_change = True
 
 
 class Report:
