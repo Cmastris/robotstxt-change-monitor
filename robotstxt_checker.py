@@ -6,9 +6,9 @@
 # TODO: Consider using a DB to manage monitored sites (creation, deletion, email/name changes)
 
 
-# List of tuples containing each monitored website name, URL, and owner email
 # TODO: Use CSV file instead and init in ManageWebsiteChecks
-monitored_sites = [
+# Constant describing each monitored URL, website name, and owner email
+MONITORED_SITES = [
     ("https://www.example.com/", "Test Site", "test@hotmail.com"),
                    ]
 
@@ -235,4 +235,4 @@ class ErrorReport(Report):
 
 
 if __name__ == "__main__":
-    RunChecks(monitored_sites).check_all()
+    RunChecks(MONITORED_SITES).check_all()
