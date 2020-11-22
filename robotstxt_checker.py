@@ -6,7 +6,7 @@
 # TODO: Consider using a DB to manage monitored sites (creation, deletion, email/name changes)
 
 
-# TODO: Use CSV file instead and init in ManageWebsiteChecks
+# TODO: Use CSV file instead and define function to convert into list of tuples
 # Constant describing each monitored URL, website name, and owner email
 MONITORED_SITES = [
     ("https://www.example.com/", "Test Site", "test@hotmail.com"),
@@ -23,7 +23,7 @@ class RunChecks:
 
     def __init__(self, sites):
         """Initialise RobotsCheck instances and store them in a list."""
-        self.sites = sites
+        self.sites = sites.copy()
 
     def check_all(self):
         """Iterate over all RobotsCheck instances to run change checks and reports."""
