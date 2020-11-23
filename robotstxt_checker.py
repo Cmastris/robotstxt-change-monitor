@@ -91,8 +91,11 @@ class RobotsCheck:
         print("Method run_check called.")
         try:
             extraction = self.download_robotstxt()
-        except:  # TODO: Add specific errors and messages
-            self.err_message = "something"
+            print("Successful robots.txt extraction for {}.".format(self.url))
+        except:
+            # Catch all to prevent fatal error; terminate current check if download unsuccessful
+            # Specific errors caught in download_robotstxt() and logged in self.error
+            print("Exception raised by download_robotstxt() for {}.".format(self.url))
             return self
 
         self.update_records(extraction)
