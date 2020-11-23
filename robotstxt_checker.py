@@ -116,7 +116,7 @@ class RobotsCheck:
             raise
         except requests.exceptions.ConnectionError as e:
             self.err_message = "There was a connection error when accessing {}. "\
-                "TYPE: {} DETAILS: {}".format(robots_url, type(e), e).format(robots_url)
+                "TYPE: {} DETAILS: {}".format(robots_url, type(e), e)
             print(self.err_message)
             raise
         # Unexpected errors
