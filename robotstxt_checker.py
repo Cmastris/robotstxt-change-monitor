@@ -5,11 +5,12 @@
 # TODO: Allow for multiple emails per website
 # TODO: Consider using a DB to manage monitored sites (creation, deletion, email/name changes)
 
+import requests
 
 # TODO: Use CSV file instead and define function to convert into list of tuples
 # Constant describing each monitored URL, website name, and owner email
 MONITORED_SITES = [
-    ("https://www.example.com/", "Test Site", "test@hotmail.com"),
+    ("https://github.com/", "Test Site", "test@hotmail.com"),
                    ]
 
 # File location of master log which details check and change history
@@ -102,10 +103,33 @@ class RobotsCheck:
 
     def download_robotstxt(self):
         """Extract and return the current content (str) of the robots.txt file."""
-        # TODO: complete method
-        # Use Beautiful Soup or Requests
-        # Raise any HTTP/extraction errors
-        return "Test extraction"
+        robots_url = self.url + "robots.txt"
+        print("Fetching robots.txt file")
+        try:
+            r = requests.get(robots_url, allow_redirects=False, timeout=40)
+        except requests.exceptions.Timeout:
+            self.err_message = "{} timed out before sending a valid response.".format(robots_url)
+            print(self.err_message)
+            raise
+        except requests.exceptions.ConnectionError as e:
+            self.err_message = "There was a connection error when accessing {}. "\
+                "TYPE: {} DETAILS: {}".format(robots_url, type(e), e).format(robots_url)
+            print(self.err_message)
+            raise
+        # Unexpected errors
+        except Exception as e:
+            self.err_message = "Error occurred when requesting {} during download_robotstxt(). " \
+                               "TYPE: {} DETAILS: {}".format(robots_url, type(e), e)
+            print(self.err_message)
+            raise
+
+        if r.status_code != 200:
+            self.err_message = "{} returned a {} status code.".format(robots_url, r.status_code)
+            print(self.err_message)
+            raise requests.exceptions.HTTPError
+
+        print("Returning response text for {}".format(robots_url))
+        return r.text
 
     def update_records(self, new_extraction):
         """Update the files containing the current and previous robots.txt content.
