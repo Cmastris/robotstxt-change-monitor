@@ -18,6 +18,10 @@ MONITORED_SITES = [
 master_log = "data/master_log.txt"
 
 
+# TODO: populate function
+def get_timestamp():
+    return "Timestamp"
+
 class RunChecks:
     """Run robots.txt checks across monitored websites.
 
