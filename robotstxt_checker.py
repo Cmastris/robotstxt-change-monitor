@@ -19,8 +19,18 @@ master_log = None
 
 
 class RunChecks:
-    """Run robots.txt checks across websites."""
-    # TODO: complete class and method documentation
+    """Run robots.txt checks across monitored websites.
+
+    This class is used to run robots.txt checks by initialising RobotsCheck instances,
+    before initialising the relevant Report subclass to generate logs and communications.
+
+    Attributes:
+        sites (list): a list of lists, with each list item in the form: [url, name, email].
+            - url (str): the absolute URL of the website homepage, with a trailing slash.
+            - name (str): the website's name identifier.
+            - email (str): the email address of the owner, who will receive alerts.
+
+    """
 
     def __init__(self, sites):
         self.sites = sites.copy()
