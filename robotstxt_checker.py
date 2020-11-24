@@ -10,7 +10,7 @@ import requests
 # TODO: Use CSV file instead and define function to convert into list of tuples
 # Constant describing each monitored URL, website name, and owner email
 MONITORED_SITES = [
-    ("https://github.com/", "Test Site", "test@hotmail.com"),
+    ["https://github.com/", "Test Site", "test@hotmail.com"],
                    ]
 
 # File location of master log which details check and change history
@@ -23,8 +23,10 @@ class RunChecks:
     # TODO: complete class and method documentation
 
     def __init__(self, sites):
-        """Initialise RobotsCheck instances and store them in a list."""
         self.sites = sites.copy()
+        for site_check in self.sites:
+            site_check[0] = site_check[0].strip()
+            site_check[2] = site_check[2].strip()
 
     def check_all(self):
         """Iterate over all RobotsCheck instances to run change checks and reports."""
