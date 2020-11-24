@@ -59,9 +59,10 @@ class RobotsCheck:
 
     Attributes:
         url (str): the absolute URL of the website homepage, with a trailing slash.
+        first_run (bool): if this is the first recorded check of the website's file.
         err_message (None, str): None by default, otherwise a description of the error.
         file_change (bool): if the robots.txt file has changed since the previous record.
-        first_run (bool): if this is the first recorded check of the website's file.
+        dir (str): the name of the directory containing website data.
         old_file (str): the file containing the previous check robots.txt content.
         old_content (str): the previous check robots.txt content.
         new_file (str): the file containing the latest check robots.txt content.
@@ -71,11 +72,15 @@ class RobotsCheck:
 
     def __init__(self, url):
         self.url = url
+        self.first_run = False
         self.err_message = None
         self.file_change = False
+        if self.url[4] == 's':
+            self.dir = self.url[8:-1]
+        else:
+            self.dir = self.url[7:-1]
         # TODO: Try to assign existing files to self
-        # Otherwise, if they don't exist, create/assign files and set first_run = True
-        self.first_run = False
+        # Otherwise, if they don't exist, create/assign directory/files and set first_run = True
         self.log_file = "test log"
         self.old_file = "test old file"
         self.old_content = "test old content"
@@ -165,13 +170,15 @@ class Report:
     """Reports the robots.txt check result for a single website.
 
     Attributes:
-        name (str): the website's name identifier.
         url (str): the absolute URL of the website homepage, with a trailing slash.
+        dir (str): the name of the directory containing website data.
+        name (str): the website's name identifier.
         email (str): the email address of the owner, who will receive alerts.
     """
     # TODO: complete class and method documentation
     def __init__(self, website, name, email):
         self.url = website.url
+        self.dir = website.dir
         self.name = name
         self.email = email
         self.time = "time"  # TODO: string showing the date and time
