@@ -50,6 +50,9 @@ class RunChecks:
 
     def check_all(self):
         """Iterate over all RobotsCheck instances to run change checks and reports."""
+        with open(master_log, 'a') as f:
+            f.write('{}: Starting checks on {} sites.\n'.format(get_timestamp(), len(self.sites)))
+
         for site_check in self.sites:
             url, name, email = site_check
             check = RobotsCheck(url)
