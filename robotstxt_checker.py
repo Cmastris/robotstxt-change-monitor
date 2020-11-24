@@ -5,6 +5,7 @@
 # TODO: Allow for multiple emails per website
 # TODO: Consider using a DB to manage monitored sites (creation, deletion, email/name changes)
 
+import os
 import requests
 
 # TODO: Use CSV file instead and define function to convert into list of tuples
@@ -14,8 +15,7 @@ MONITORED_SITES = [
                    ]
 
 # File location of master log which details check and change history
-# TODO: Add master log location, create file if it doesn't exist (check using os.path)
-master_log = None
+master_log = "data/master_log.txt"
 
 
 class RunChecks:
@@ -37,6 +37,12 @@ class RunChecks:
         for site_check in self.sites:
             site_check[0] = site_check[0].strip()
             site_check[2] = site_check[2].strip()
+
+        # If /data doesn't exist yet, create directory and master log file
+        if not os.path.isdir('data'):
+            os.mkdir('data')
+            f = open(master_log, 'x')
+            f.close()
 
     def check_all(self):
         """Iterate over all RobotsCheck instances to run change checks and reports."""
