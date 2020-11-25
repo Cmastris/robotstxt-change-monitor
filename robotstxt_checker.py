@@ -12,7 +12,8 @@ import requests
 # TODO: Use CSV file instead and define function to convert into list of tuples
 # Constant describing each monitored URL, website name, and owner email
 MONITORED_SITES = [
-    ["https://github.com/", "Test Site", "test@hotmail.com"],
+    ["https://github.com/", "Github", "test@hotmail.com"],
+    ["http://github.com/", "Github HTTP", "test@hotmail.com"],
                    ]
 
 # File location of master log which details check and change history
@@ -54,27 +55,33 @@ class RunChecks:
     def check_all(self):
         """Iterate over all RobotsCheck instances to run change checks and reports."""
         with open(master_log, 'a') as f:
-            f.write('{}: Starting checks on {} sites.\n'.format(get_timestamp(), len(self.sites)))
+            f.write("{}: Starting checks on {} sites.\n".format(get_timestamp(), len(self.sites)))
 
+        no_change, change, first, err = 0, 0, 0, 0
         for site_check in self.sites:
             url, name, email = site_check
             check = RobotsCheck(url)
             check.run_check()
-            print("Robots.txt checked: " + check.url)
-            # TODO: Init appropriate report subclass based on check attributes
             if check.err_message:
                 report = ErrorReport(check, name, email)
+                err += 1
             elif check.first_run:
                 report = FirstRunReport(check, name, email)
+                first += 1
             elif check.file_change:
                 report = ChangeReport(check, name, email)
+                change += 1
             else:
                 report = NoChangeReport(check, name, email)
+                no_change += 1
 
+            print("{} check complete. Initialising {}.".format(url, type(report).__name__))
             report.create_reports()
-            print("Report complete: " + report.url)
 
         print("All checks and reports complete.")
+        with open(master_log, 'a') as f:
+            f.write("{}: Checks complete. No change: {}. Change: {}. First run: {}. Error: {}."
+                    "\n".format(get_timestamp(), no_change, change, first, err))
 
 
 class RobotsCheck:
@@ -148,7 +155,7 @@ class RobotsCheck:
             print(self.err_message)
             raise
         except requests.exceptions.ConnectionError as e:
-            self.err_message = "There was a connection error when accessing {}. "\
+            self.err_message = "There was a connection error when accessing {}. " \
                 "TYPE: {} DETAILS: {}".format(robots_url, type(e), e)
             print(self.err_message)
             raise
