@@ -5,6 +5,7 @@
 # TODO: Allow for multiple emails per website
 # TODO: Consider using a DB to manage monitored sites (creation, deletion, email/name changes)
 
+import datetime
 import os
 import requests
 
@@ -18,9 +19,11 @@ MONITORED_SITES = [
 master_log = "data/master_log.txt"
 
 
-# TODO: populate function
 def get_timestamp():
-    return "Timestamp"
+    """Return the current time as a string in the form 'day-month-year hour:minute'"""
+    time = datetime.datetime.now()
+    return time.strftime("%d-%m-%y %H:%M")
+
 
 class RunChecks:
     """Run robots.txt checks across monitored websites.
