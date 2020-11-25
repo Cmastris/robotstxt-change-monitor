@@ -114,13 +114,12 @@ class RobotsCheck:
             self.dir = self.url[8:-1]
         else:
             self.dir = self.url[7:-1]
-        # TODO: Try to assign existing files to self
-        # Otherwise, if they don't exist, create/assign directory/files and set first_run = True
         self.log_file = "test log"
         self.old_file = "test old file"
         self.old_content = "test old content"
         self.new_file = "test new file"
         self.new_content = "test new content"
+        # TODO: Check if site directory exists and create directory and site log if not
 
     def run_check(self):
         """Update the robots.txt file records and check for changes.
@@ -186,6 +185,8 @@ class RobotsCheck:
 
         """
         # TODO: complete method
+        # TODO: Check if files exist, if not then create and set first_run = True
+        # Change to else
         if not self.first_run:
             # Copy the contents of new_file and overwrite the contents of old_file
             # Update old_content
