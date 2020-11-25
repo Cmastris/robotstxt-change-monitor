@@ -202,6 +202,7 @@ class Report:
         dir (str): the name of the directory containing website data.
         name (str): the website's name identifier.
         email (str): the email address of the owner, who will receive alerts.
+        timestamp (str): the (approximate) time of the check.
     """
     # TODO: complete class and method documentation
     def __init__(self, website, name, email):
@@ -209,7 +210,7 @@ class Report:
         self.dir = website.dir
         self.name = name
         self.email = email
-        self.time = "time"  # TODO: string showing the date and time
+        self.timestamp = get_timestamp()
 
     def create_snapshot(self):
         # TODO: populate method to record a file snapshot (called for first run and change)
