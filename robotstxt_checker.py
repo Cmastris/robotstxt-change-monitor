@@ -21,9 +21,9 @@ master_log = "data/master_log.txt"
 
 
 def get_timestamp():
-    """Return the current time as a string in the form 'day-month-year hour:minute'"""
+    """Return the current time as a string in the form 'day-month-year, hour:minute'"""
     time = datetime.datetime.now()
-    return time.strftime("%d-%m-%y %H:%M")
+    return time.strftime("%d-%m-%y, %H:%M")
 
 
 class RunChecks:
