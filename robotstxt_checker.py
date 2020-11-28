@@ -13,7 +13,7 @@ import requests
 # Constant describing each monitored URL, website name, and owner email
 MONITORED_SITES = [
     ["https://github.com/", "Github", "test@hotmail.com"],
-    ["http://github.com/", "Github HTTP", "test@hotmail.com"],
+    ["https://www.reddit.com/", "Reddit HTTP", "test@hotmail.com"],
                    ]
 
 # File location of master log which details check and change history
@@ -181,25 +181,31 @@ class RobotsCheck:
     def update_records(self, new_extraction):
         """Update the files containing the current and previous robots.txt content.
 
-        If the robots.txt file has been checked previously (first_run=False),
+        If the robots.txt file has been successfully checked previously,
         overwrite old_file with the contents of new_file (from the previous check).
+        Otherwise, create the content files and set first_run = True.
         Then, add the new robots.txt extraction content to new_file.
 
         Args:
             new_extraction (str): the current content of the robots.txt file.
 
         """
-        # TODO: complete method
-        # TODO: Check if files exist, if not then create and set first_run = True
-        # Change to else
-        if not self.first_run:
-            # Copy the contents of new_file and overwrite the contents of old_file
-            # Update old_content
-            pass
+        if os.path.isfile(self.new_file):
+            # Overwrite the contents of old_file with the contents of new_file
+            with open(self.old_file, 'w') as old, open(self.new_file, 'r') as new:
+                self.old_content = new.read()
+                old.write(self.old_content)
+
+        else:
+            # Create robots.txt content files if they don't exist (first non-error run)
+            with open(self.old_file, 'x'), open(self.new_file, 'x'):
+                pass
+            self.first_run = True
 
         # Overwrite the contents of new_file with new_extraction
-        # Update new_content
-        pass
+        self.new_content = new_extraction
+        with open(self.new_file, 'w') as new:
+            new.write(self.new_content)
 
     def check_diff(self):
         """Check for file differences and update self.file_change."""
