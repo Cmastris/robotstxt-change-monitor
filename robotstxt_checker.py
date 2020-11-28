@@ -122,9 +122,17 @@ class RobotsCheck:
         self.new_content = None
         # If site directory doesn't exist yet, create directory and site log file
         if not os.path.isdir(self.dir):
-            os.mkdir(self.dir)
-            f = open(self.log_file, 'x')
-            f.close()
+            try:
+                os.mkdir(self.dir)
+                with open(self.log_file, 'x'):
+                    pass
+            except OSError as e:
+                self.err_message = "Error when creating {} directory or log file. " \
+                                   "TYPE: {} DETAILS: {}".format(self.url, type(e), e)
+
+        if (self.url[:4] != "http") or (self.url[-1] != "/"):
+            self.err_message = "{} is not a valid site URL. The site URL must be absolute and " \
+                               "end in a slash, e.g. 'https://www.example.com/'.".format(url)
 
     def run_check(self):
         """Update the robots.txt file records and check for changes.
@@ -132,7 +140,10 @@ class RobotsCheck:
         Returns:
             The class instance representing the completed robots.txt check.
         """
-        print("Method run_check called.")
+        if self.err_message:
+            # If error during __init__
+            print(self.err_message)
+            return self
         try:
             extraction = self.download_robotstxt()
             print("Successful robots.txt extraction for {}.".format(self.url))
