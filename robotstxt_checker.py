@@ -97,11 +97,12 @@ class RobotsCheck:
         first_run (bool): if this is the first recorded check of the website's file.
         err_message (None, str): None by default, otherwise a description of the error.
         file_change (bool): if the robots.txt file has changed since the previous record.
-        dir (str): the name of the directory containing website data.
-        old_file (str): the file containing the previous check robots.txt content.
+        dir (str): the location of the directory containing website data.
+        log_file (str): the file location of the website log.
+        old_file (str): the file location of the previous check robots.txt content.
+        new_file (str): the file location of the latest check robots.txt content.
         old_content (str): the previous check robots.txt content.
-        new_file (str): the file containing the latest check robots.txt content.
-        old_content (str): the latest check robots.txt content.
+        new_content (str): the latest check robots.txt content.
 
     """
 
@@ -111,15 +112,19 @@ class RobotsCheck:
         self.err_message = None
         self.file_change = False
         if self.url[4] == 's':
-            self.dir = self.url[8:-1]
+            self.dir = "data/" + self.url[8:-1]
         else:
-            self.dir = self.url[7:-1]
-        self.log_file = "test log"
-        self.old_file = "test old file"
-        self.old_content = "test old content"
-        self.new_file = "test new file"
-        self.new_content = "test new content"
-        # TODO: Check if site directory exists and create directory and site log if not
+            self.dir = "data/" + self.url[7:-1]
+        self.log_file = self.dir + "/log.txt"
+        self.old_file = self.dir + "/old_file.txt"
+        self.new_file = self.dir + "/new_file.txt"
+        self.old_content = None
+        self.new_content = None
+        # If site directory doesn't exist yet, create directory and site log file
+        if not os.path.isdir(self.dir):
+            os.mkdir(self.dir)
+            f = open(self.log_file, 'x')
+            f.close()
 
     def run_check(self):
         """Update the robots.txt file records and check for changes.
