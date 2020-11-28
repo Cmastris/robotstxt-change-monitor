@@ -43,7 +43,7 @@ class RunChecks:
     def __init__(self, sites):
         self.sites = sites.copy()
         for site_check in self.sites:
-            site_check[0] = site_check[0].strip()
+            site_check[0] = site_check[0].strip().lower()
             site_check[2] = site_check[2].strip()
 
         # If /data doesn't exist yet, create directory and master log file
