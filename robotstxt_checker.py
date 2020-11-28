@@ -147,13 +147,18 @@ class RobotsCheck:
         try:
             extraction = self.download_robotstxt()
             print("Successful robots.txt extraction for {}.".format(self.url))
+            self.update_records(extraction)
+            print("Successful file record update for {}.".format(self.url))
+        except OSError as e:
+            self.err_message = "Error when updating {} file records. " \
+                               "TYPE: {} DETAILS: {}".format(self.url, type(e), e)
+            print(self.err_message)
         except:
-            # Catch all to prevent fatal error; terminate current check if download unsuccessful
-            # Specific errors caught in download_robotstxt() and logged in self.error
-            print("Exception raised by download_robotstxt() for {}.".format(self.url))
+            # Catch all to prevent fatal error; terminate current check if unsuccessful
+            # Specific errors caught and logged in self.error
+            print(self.err_message)
             return self
 
-        self.update_records(extraction)
         if not self.first_run:
             self.check_diff()
 
