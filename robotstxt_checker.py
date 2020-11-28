@@ -155,7 +155,7 @@ class RobotsCheck:
             print(self.err_message)
         except:
             # Catch all to prevent fatal error; terminate current check if unsuccessful
-            # Specific errors caught and logged in self.error
+            # Specific errors caught and logged in self.err_message
             print(self.err_message)
             return self
 
@@ -172,23 +172,19 @@ class RobotsCheck:
             r = requests.get(robots_url, allow_redirects=False, timeout=40)
         except requests.exceptions.Timeout:
             self.err_message = "{} timed out before sending a valid response.".format(robots_url)
-            print(self.err_message)
             raise
         except requests.exceptions.ConnectionError as e:
             self.err_message = "There was a connection error when accessing {}. " \
                 "TYPE: {} DETAILS: {}".format(robots_url, type(e), e)
-            print(self.err_message)
             raise
         # Unexpected errors
         except Exception as e:
             self.err_message = "Error occurred when requesting {} during download_robotstxt(). " \
                                "TYPE: {} DETAILS: {}".format(robots_url, type(e), e)
-            print(self.err_message)
             raise
 
         if r.status_code != 200:
             self.err_message = "{} returned a {} status code.".format(robots_url, r.status_code)
-            print(self.err_message)
             raise requests.exceptions.HTTPError
 
         print("Returning response text for {}".format(robots_url))
