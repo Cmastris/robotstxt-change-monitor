@@ -8,12 +8,13 @@
 import datetime
 import os
 import requests
+import traceback
 
 # TODO: Use CSV file instead and define function to convert into list of tuples
 # Constant describing each monitored URL, website name, and owner email
 MONITORED_SITES = [
     ["https://github.com/", "Github", "test@hotmail.com"],
-    ["https://www.reddit.com/", "Reddit HTTP", "test@hotmail.com"],
+    ["http://www.reddit.com/", "Reddit HTTP", "test@hotmail.com"],
                    ]
 
 # File location of master log which details check and change history
@@ -126,8 +127,8 @@ class RobotsCheck:
                 os.mkdir(self.dir)
                 with open(self.log_file, 'x'):
                     pass
-            except OSError as e:
-                self.err_message = "Error when creating {} directory or log file. " \
+            except Exception as e:
+                self.err_message = "Error when creating {} directories or log file. " \
                                    "TYPE: {} DETAILS: {}".format(self.url, type(e), e)
 
         if (self.url[:4] != "http") or (self.url[-1] != "/"):
@@ -141,26 +142,21 @@ class RobotsCheck:
             The class instance representing the completed robots.txt check.
         """
         if self.err_message:
-            # If error during __init__
+            # If error/invalid URL during __init__
             print(self.err_message)
             return self
         try:
             extraction = self.download_robotstxt()
-            print("Successful robots.txt extraction for {}.".format(self.url))
             self.update_records(extraction)
-            print("Successful file record update for {}.".format(self.url))
-        except OSError as e:
-            self.err_message = "Error when updating {} file records. " \
-                               "TYPE: {} DETAILS: {}".format(self.url, type(e), e)
+            if not self.first_run:
+                self.check_diff()
+        except Exception as e:
+            # Anticipated errors caught in download_robotstxt() and logged in self.err_message
+            if not self.err_message:
+                trace_str = "".join(traceback.format_tb(e.__traceback__))
+                self.err_message = "Unexpected error during {} check. TYPE: {}, DETAILS: {}, " \
+                                   "TRACEBACK:\n{}".format(self.url, type(e), e, trace_str)
             print(self.err_message)
-        except:
-            # Catch all to prevent fatal error; terminate current check if unsuccessful
-            # Specific errors caught and logged in self.err_message
-            print(self.err_message)
-            return self
-
-        if not self.first_run:
-            self.check_diff()
 
         return self
 
@@ -177,17 +173,10 @@ class RobotsCheck:
             self.err_message = "There was a connection error when accessing {}. " \
                 "TYPE: {} DETAILS: {}".format(robots_url, type(e), e)
             raise
-        # Unexpected errors
-        except Exception as e:
-            self.err_message = "Error occurred when requesting {} during download_robotstxt(). " \
-                               "TYPE: {} DETAILS: {}".format(robots_url, type(e), e)
-            raise
-
         if r.status_code != 200:
             self.err_message = "{} returned a {} status code.".format(robots_url, r.status_code)
             raise requests.exceptions.HTTPError
 
-        print("Returning response text for {}".format(robots_url))
         return r.text
 
     def update_records(self, new_extraction):
