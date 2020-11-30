@@ -237,6 +237,11 @@ class Report:
         self.email = email
         self.timestamp = get_timestamp()
 
+    def update_logs(self, message, update_master=True):
+        # TODO: init site log (rather than in RobotsCheck)
+        # TODO: complete method
+        pass
+
     def create_snapshot(self):
         """Create a unique text file containing the latest robots.txt content."""
         file_name = self.timestamp.replace(",", " T").replace(":", "-") + ".txt"
@@ -255,8 +260,6 @@ class Report:
 class NoChangeReport(Report):
     # TODO: Complete documentation and add methods
     # TODO: Add method to print results to the console
-    # TODO: Add method to update the master log
-    # TODO: Add method to update the website log
     def __init__(self, website, name, email):
         Report.__init__(self, website, name, email)  # TODO: Change to use super
 
@@ -272,8 +275,6 @@ class NoChangeReport(Report):
 class ChangeReport(Report):
     # TODO: Complete documentation and add methods
     # TODO: Add method to print results to the console
-    # TODO: Add method to update the master log
-    # TODO: Add method to update the website log
     # TODO: Add method to write an email report
     def __init__(self, website, name, email):
         Report.__init__(self, website, name, email)  # TODO: Change to use super
@@ -294,8 +295,6 @@ class ChangeReport(Report):
 class FirstRunReport(Report):
     # TODO: Complete documentation and add methods
     # TODO: Add method to print results to the console
-    # TODO: Add method to update the master log
-    # TODO: Add method to update the website log
     # TODO: Add method to write an email report
     def __init__(self, website, name, email):
         Report.__init__(self, website, name, email)  # TODO: Change to use super
@@ -315,8 +314,6 @@ class FirstRunReport(Report):
 class ErrorReport(Report):
     # TODO: Complete documentation and add methods
     # TODO: Add method to print results to the console
-    # TODO: Add method to update the master log
-    # TODO: Add method to update the website log
     # TODO: Add method to write an email report
     def __init__(self, website, name, email):
         Report.__init__(self, website, name, email)  # TODO: Change to use super
