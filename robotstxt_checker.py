@@ -215,16 +215,20 @@ class RobotsCheck:
 
 
 class Report:
-    """Reports the robots.txt check result for a single website.
+    """Report/log the results of a single robots.txt check.
+
+    This is a base class; more specific child classes should be instantiated.
 
     Attributes:
         url (str): the absolute URL of the website homepage, with a trailing slash.
         dir (str): the name of the directory containing website data.
+        new_content (str): the latest check robots.txt content.
         name (str): the website's name identifier.
         email (str): the email address of the owner, who will receive alerts.
         timestamp (str): the (approximate) time of the check.
+
     """
-    # TODO: complete class and method documentation
+
     def __init__(self, website, name, email):
         self.url = website.url
         self.dir = website.dir
