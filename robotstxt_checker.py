@@ -47,6 +47,7 @@ def update_main_log(message):
         err_msg = "Error when updating the main log. TYPE: {}, DETAILS: {}, TRACEBACK:\n" \
                   "{}".format(type(e), e, get_trace_str(e))
 
+        print(err_msg)
         unexpected_errors.append(err_msg)
 
 
@@ -81,6 +82,7 @@ class RunChecks:
     def check_all(self):
         """Iterate over all RobotsCheck instances to run change checks and reports."""
         update_main_log("Starting checks on {} sites.".format(len(self.sites)))
+        print("Starting checks on {} sites.".format(len(self.sites)))
 
         no_change, change, first, err = 0, 0, 0, 0
         for site_check in self.sites:
@@ -184,16 +186,21 @@ class RobotsCheck:
             # If error/invalid URL during __init__
             print(self.err_message)
             return self
+
         try:
             extraction = self.download_robotstxt()
             self.update_records(extraction)
             if not self.first_run:
                 self.check_diff()
+
         except Exception as e:
             # Anticipated errors caught in download_robotstxt() and logged in self.err_message
             if not self.err_message:
                 self.err_message = "Unexpected error during {} check. TYPE: {}, DETAILS: {}, " \
                                    "TRACEBACK:\n{}".format(self.url, type(e), e, get_trace_str(e))
+
+                unexpected_errors.append(self.err_message)
+
             print(self.err_message)
 
         return self
@@ -201,16 +208,18 @@ class RobotsCheck:
     def download_robotstxt(self):
         """Extract and return the current content (str) of the robots.txt file."""
         robots_url = self.url + "robots.txt"
-        print("Fetching robots.txt file")
         try:
             r = requests.get(robots_url, allow_redirects=False, timeout=40)
+
         except requests.exceptions.Timeout:
             self.err_message = "{} timed out before sending a valid response.".format(robots_url)
             raise
+
         except requests.exceptions.ConnectionError as e:
             self.err_message = "There was a connection error when accessing {}. " \
                 "TYPE: {} DETAILS: {}".format(robots_url, type(e), e)
             raise
+
         if r.status_code != 200:
             self.err_message = "{} returned a {} status code.".format(robots_url, r.status_code)
             raise requests.exceptions.HTTPError
@@ -239,6 +248,7 @@ class RobotsCheck:
             # Create robots.txt content files if they don't exist (first non-error run)
             with open(self.old_file, 'x'), open(self.new_file, 'x'):
                 pass
+
             self.first_run = True
 
         # Overwrite the contents of new_file with new_extraction
