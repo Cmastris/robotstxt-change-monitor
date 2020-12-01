@@ -27,6 +27,11 @@ def get_timestamp():
     return time.strftime("%d-%m-%y, %H:%M")
 
 
+def get_trace_str(exception):
+    """Return a str representation of an Exception traceback."""
+    return "".join(traceback.format_tb(exception.__traceback__))
+
+
 def send_email(subject, body):
     # TODO: populate function to send email
     pass
@@ -158,9 +163,8 @@ class RobotsCheck:
         except Exception as e:
             # Anticipated errors caught in download_robotstxt() and logged in self.err_message
             if not self.err_message:
-                trace_str = "".join(traceback.format_tb(e.__traceback__))
                 self.err_message = "Unexpected error during {} check. TYPE: {}, DETAILS: {}, " \
-                                   "TRACEBACK:\n{}".format(self.url, type(e), e, trace_str)
+                                   "TRACEBACK:\n{}".format(self.url, type(e), e, get_trace_str(e))
             print(self.err_message)
 
         return self
