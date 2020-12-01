@@ -14,6 +14,7 @@ import traceback
 # Constant describing each monitored URL, website name, and owner email
 MONITORED_SITES = [
     ["https://github.com/", "Github", "test@hotmail.com"],
+    ["", "No URL", "test@hotmail.com"],
     ["http://www.reddit.com/", "Reddit HTTP", "test@hotmail.com"],
                    ]
 
@@ -70,9 +71,6 @@ class RunChecks:
 
     def __init__(self, sites):
         self.sites = sites.copy()
-        for site_check in self.sites:
-            site_check[0] = site_check[0].strip().lower()
-            site_check[2] = site_check[2].strip()
 
         # If /data doesn't exist yet, create directory and main log file
         if not os.path.isdir('data'):
@@ -86,24 +84,39 @@ class RunChecks:
 
         no_change, change, first, err = 0, 0, 0, 0
         for site_check in self.sites:
-            url, name, email = site_check
-            check = RobotsCheck(url)
-            check.run_check()
-            if check.err_message:
-                report = ErrorReport(check, name, email)
-                err += 1
-            elif check.first_run:
-                report = FirstRunReport(check, name, email)
-                first += 1
-            elif check.file_change:
-                report = ChangeReport(check, name, email)
-                change += 1
-            else:
-                report = NoChangeReport(check, name, email)
-                no_change += 1
+            try:
+                url, name, email = site_check
+                url = url.strip().lower()
+                email = email.strip()
 
-            print("{} check complete. Initialising {}.".format(url, type(report).__name__))
-            report.create_reports()
+                check = RobotsCheck(url)
+                check.run_check()
+
+                if check.err_message:
+                    report = ErrorReport(check, name, email)
+                    err += 1
+                elif check.first_run:
+                    report = FirstRunReport(check, name, email)
+                    first += 1
+                elif check.file_change:
+                    report = ChangeReport(check, name, email)
+                    change += 1
+                else:
+                    report = NoChangeReport(check, name, email)
+                    no_change += 1
+
+                print("{} check complete. Initialising {}.".format(url, type(report).__name__))
+                report.create_reports()
+
+            except Exception as e:
+                err_msg = "Unexpected error for site: {}. TYPE: {}, DETAILS: {}, " \
+                          "TRACEBACK:\n{}".format(site_check, type(e), e, get_trace_str(e))
+
+                print(err_msg)
+                unexpected_errors.append(err_msg)
+                update_main_log(err_msg)
+                # Skip current check/report if unexpected error
+                continue
 
         print("All checks and reports complete.")
         update_main_log("Checks complete. No change: {}. Change: {}. First run: {}. "
@@ -355,7 +368,7 @@ if __name__ == "__main__":
         RunChecks(MONITORED_SITES).check_all()
         # TODO: email program owner with summary & unexpected errors
     except Exception as fatal_err:
-        # Fatal, otherwise unhandled errors during RunChecks
+        # Fatal error during RunChecks init
         fatal_err_msg = "Fatal error. TYPE: {}, DETAILS: {}, TRACEBACK:\n" \
                         "{}".format(type(fatal_err), fatal_err, get_trace_str(fatal_err))
 
