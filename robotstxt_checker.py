@@ -146,19 +146,20 @@ class RobotsCheck:
         self.new_file = self.dir + "/new_file.txt"
         self.old_content = None
         self.new_content = None
-        # If site directory doesn't exist yet, create directory and site log file
-        if not os.path.isdir(self.dir):
-            try:
-                os.mkdir(self.dir)
-                with open(self.log_file, 'x'):
-                    pass
-            except Exception as e:
-                self.err_message = "Error when creating {} directories or log file. " \
-                                   "TYPE: {} DETAILS: {}".format(self.url, type(e), e)
 
         if (self.url[:4] != "http") or (self.url[-1] != "/"):
             self.err_message = "{} is not a valid site URL. The site URL must be absolute and " \
                                "end in a slash, e.g. 'https://www.example.com/'.".format(url)
+
+        # If URL is valid and site directory doesn't exist, create directory
+        elif not os.path.isdir(self.dir):
+            try:
+                os.mkdir(self.dir)
+            except Exception as e:
+                self.err_message = "Error when creating {} directory. TYPE: {}, DETAILS: {}, " \
+                                   "TRACEBACK:\n{}".format(self.url, type(e), e, get_trace_str(e))
+
+                unexpected_errors.append(self.err_message)
 
     def run_check(self):
         """Update the robots.txt file records and check for changes.
