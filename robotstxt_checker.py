@@ -18,7 +18,10 @@ MONITORED_SITES = [
                    ]
 
 # File location of main log which details check and change history
-main_log = "data/main_log.txt"
+MAIN_LOG = "data/main_log.txt"
+
+# Errors which should be investigated
+unexpected_errors = []
 
 
 def get_timestamp():
@@ -30,6 +33,20 @@ def get_timestamp():
 def get_trace_str(exception):
     """Return a str representation of an Exception traceback."""
     return "".join(traceback.format_tb(exception.__traceback__))
+
+
+def update_main_log(message):
+    """Update the main log with a single message (str)."""
+    try:
+        with open(MAIN_LOG, 'a') as f:
+            f.write("{}: {}\n".format(get_timestamp(), message))
+
+    # Catch all to prevent fatal error; log error to be investigated instead
+    except Exception as e:
+        err_msg = "Error when updating the main log. TYPE: {}, DETAILS: {}, TRACEBACK:\n" \
+                  "{}".format(type(e), e, get_trace_str(e))
+
+        unexpected_errors.append(err_msg)
 
 
 def send_email(subject, body):
@@ -60,13 +77,12 @@ class RunChecks:
         # If /data doesn't exist yet, create directory and main log file
         if not os.path.isdir('data'):
             os.mkdir('data')
-            f = open(main_log, 'x')
+            f = open(MAIN_LOG, 'x')
             f.close()
 
     def check_all(self):
         """Iterate over all RobotsCheck instances to run change checks and reports."""
-        with open(main_log, 'a') as f:
-            f.write("{}: Starting checks on {} sites.\n".format(get_timestamp(), len(self.sites)))
+        update_main_log("Starting checks on {} sites.".format(len(self.sites)))
 
         no_change, change, first, err = 0, 0, 0, 0
         for site_check in self.sites:
@@ -90,9 +106,8 @@ class RunChecks:
             report.create_reports()
 
         print("All checks and reports complete.")
-        with open(main_log, 'a') as f:
-            f.write("{}: Checks complete. No change: {}. Change: {}. First run: {}. Error: {}."
-                    "\n".format(get_timestamp(), no_change, change, first, err))
+        update_main_log("Checks complete. No change: {}. Change: {}. First run: {}. "
+                        "Error: {}.".format(no_change, change, first, err))
 
 
 class RobotsCheck:
