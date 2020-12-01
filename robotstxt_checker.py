@@ -351,4 +351,14 @@ class ErrorReport(Report):
 
 
 if __name__ == "__main__":
-    RunChecks(MONITORED_SITES).check_all()
+    try:
+        RunChecks(MONITORED_SITES).check_all()
+        # TODO: email program owner with summary & unexpected errors
+    except Exception as fatal_err:
+        # Fatal, otherwise unhandled errors during RunChecks
+        fatal_err_msg = "Fatal error. TYPE: {}, DETAILS: {}, TRACEBACK:\n" \
+                        "{}".format(type(fatal_err), fatal_err, get_trace_str(fatal_err))
+
+        print(fatal_err_msg)
+        update_main_log(fatal_err_msg)
+        # TODO: email program owner
