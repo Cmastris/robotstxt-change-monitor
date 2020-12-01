@@ -17,8 +17,8 @@ MONITORED_SITES = [
     ["http://www.reddit.com/", "Reddit HTTP", "test@hotmail.com"],
                    ]
 
-# File location of master log which details check and change history
-master_log = "data/master_log.txt"
+# File location of main log which details check and change history
+main_log = "data/main_log.txt"
 
 
 def get_timestamp():
@@ -57,15 +57,15 @@ class RunChecks:
             site_check[0] = site_check[0].strip().lower()
             site_check[2] = site_check[2].strip()
 
-        # If /data doesn't exist yet, create directory and master log file
+        # If /data doesn't exist yet, create directory and main log file
         if not os.path.isdir('data'):
             os.mkdir('data')
-            f = open(master_log, 'x')
+            f = open(main_log, 'x')
             f.close()
 
     def check_all(self):
         """Iterate over all RobotsCheck instances to run change checks and reports."""
-        with open(master_log, 'a') as f:
+        with open(main_log, 'a') as f:
             f.write("{}: Starting checks on {} sites.\n".format(get_timestamp(), len(self.sites)))
 
         no_change, change, first, err = 0, 0, 0, 0
@@ -90,7 +90,7 @@ class RunChecks:
             report.create_reports()
 
         print("All checks and reports complete.")
-        with open(master_log, 'a') as f:
+        with open(main_log, 'a') as f:
             f.write("{}: Checks complete. No change: {}. Change: {}. First run: {}. Error: {}."
                     "\n".format(get_timestamp(), no_change, change, first, err))
 
@@ -246,7 +246,7 @@ class Report:
         self.email = email
         self.timestamp = get_timestamp()
 
-    def update_logs(self, message, update_master=True):
+    def update_logs(self, message, update_main=True):
         # TODO: init site log (rather than in RobotsCheck)
         # TODO: complete method
         pass
@@ -271,7 +271,7 @@ class NoChangeReport(Report):
     def create_reports(self):
         # TODO: populate method
         # Update the website log
-        # Update the master log
+        # Update the main log
         # Print result to the console
         print("Method create_reports called.")
         return self
@@ -288,7 +288,7 @@ class ChangeReport(Report):
     def create_reports(self):
         # TODO: populate method
         # Update the website log
-        # Update the master log
+        # Update the main log
         # Print result to the console
         # Record snapshot
         # Write and send email
@@ -307,7 +307,7 @@ class FirstRunReport(Report):
     def create_reports(self):
         # TODO: populate method
         # Update the website log
-        # Update the master log
+        # Update the main log
         # Print result to the console
         # Record snapshot
         # Write and send email
@@ -327,7 +327,7 @@ class ErrorReport(Report):
     def create_reports(self):
         # TODO: populate method
         # Update the website log
-        # Update the master log
+        # Update the main log
         # Print result to the console
         # Write and send email
         print("Method create_reports called.")
