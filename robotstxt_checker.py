@@ -117,6 +117,8 @@ class RunChecks:
                 print(err_msg)
                 unexpected_errors.append(err_msg)
                 update_main_log(err_msg)
+                # TODO: send email to user
+                err += 1
                 # Skip current check/report if unexpected error
                 continue
 
