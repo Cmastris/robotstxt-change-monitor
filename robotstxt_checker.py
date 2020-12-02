@@ -51,7 +51,7 @@ def update_main_log(message):
         unexpected_errors.append(err_msg)
 
 
-def send_email(subject, body):
+def send_email(address, subject, body):
     # TODO: populate function to send email
     pass
 
@@ -364,21 +364,20 @@ class FirstRunReport(Report):
 
 
 class ErrorReport(Report):
-    # TODO: Complete documentation and add methods
-    # TODO: Add method to print results to the console
-    # TODO: Add method to write an email report
+    # TODO: Complete documentation
     def __init__(self, website, name, email):
         Report.__init__(self, website, name, email)  # TODO: Change to use super
         self.err_message = website.err_message
 
     def create_reports(self):
-        # TODO: populate method
-        # Update the website log
-        # Update the main log
-        # Print result to the console
-        # Write and send email
-        print("Method create_reports called.")
-        return self
+        """Update site log, update main log, print result, and send email."""
+        if os.path.isdir(self.dir):
+            self.update_site_log(self.err_message)
+        update_main_log(self.err_message)
+        print(self.err_message)
+        email_subject = "{} Robots.txt Check Error".format(self.name)
+        email_body = self.err_message
+        send_email(self.email, email_subject, email_body)
 
 
 if __name__ == "__main__":
