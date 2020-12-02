@@ -141,7 +141,6 @@ class RobotsCheck:
         err_message (None, str): None by default, otherwise a description of the error.
         file_change (bool): if the robots.txt file has changed since the previous record.
         dir (str): the location of the directory containing website data.
-        log_file (str): the file location of the website log.
         old_file (str): the file location of the previous check robots.txt content.
         new_file (str): the file location of the latest check robots.txt content.
         old_content (str): the previous check robots.txt content.
@@ -158,7 +157,6 @@ class RobotsCheck:
             self.dir = "data/" + self.url[8:-1]
         else:
             self.dir = "data/" + self.url[7:-1]
-        self.log_file = self.dir + "/log.txt"
         self.old_file = self.dir + "/old_file.txt"
         self.new_file = self.dir + "/new_file.txt"
         self.old_content = None
