@@ -287,10 +287,21 @@ class Report:
         self.email = email
         self.timestamp = get_timestamp()
 
-    def update_logs(self, message, update_main=True):
-        # TODO: init site log (rather than in RobotsCheck)
-        # TODO: complete method
-        pass
+    def update_site_log(self, message):
+        """Update the site log with a single message (str)."""
+        try:
+            log_file = self.dir + "/log.txt"
+            # Append or create file if it doesn't exist
+            with open(log_file, 'a+') as f:
+                f.write("{}: {}\n".format(self.timestamp, message))
+
+        except Exception as e:
+            err_msg = "Error when updating the site log. TYPE: {}, DETAILS: {}, TRACEBACK:\n" \
+                      "{}".format(type(e), e, get_trace_str(e))
+
+            print(err_msg)
+            unexpected_errors.append(err_msg)
+            update_main_log(err_msg)
 
     def create_snapshot(self):
         """Create a unique text file containing the latest robots.txt content."""
