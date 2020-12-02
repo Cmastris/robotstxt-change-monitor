@@ -313,7 +313,7 @@ class Report:
 
 
 class NoChangeReport(Report):
-    # TODO: Complete documentation
+    """Log and print the result (no change) of a single robots.txt check."""
     def __init__(self, website, name, email):
         Report.__init__(self, website, name, email)  # TODO: Change to use super
 
