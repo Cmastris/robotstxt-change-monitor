@@ -33,7 +33,7 @@ def get_timestamp():
 
 def get_trace_str(exception):
     """Return a str representation of an Exception traceback."""
-    return "".join(traceback.format_tb(exception.__traceback__))
+    return "".join(traceback.format_tb(exception.__traceback__)).strip()
 
 
 def update_main_log(message):
@@ -44,8 +44,8 @@ def update_main_log(message):
 
     # Catch all to prevent fatal error; log error to be investigated instead
     except Exception as e:
-        err_msg = "Error when updating the main log. TYPE: {}, DETAILS: {}, TRACEBACK:\n" \
-                  "{}".format(type(e), e, get_trace_str(e))
+        err_msg = "Error when updating the main log. TYPE: {}, DETAILS: {}, TRACEBACK:\n\n" \
+                  "{}\n".format(type(e), e, get_trace_str(e))
 
         print(err_msg)
         unexpected_errors.append(err_msg)
@@ -123,7 +123,7 @@ class RunChecks:
 
             except Exception as e:
                 err_msg = "Unexpected error for site: {}. TYPE: {}, DETAILS: {}, " \
-                          "TRACEBACK:\n{}".format(site_check, type(e), e, get_trace_str(e))
+                          "TRACEBACK:\n\n{}\n".format(site_check, type(e), e, get_trace_str(e))
 
                 print(err_msg)
                 unexpected_errors.append(err_msg)
@@ -134,8 +134,8 @@ class RunChecks:
                 continue
 
         print("All checks and reports complete.")
-        update_main_log("Checks complete. No change: {}. Change: {}. First run: {}. "
-                        "Error: {}.".format(no_change, change, first, err))
+        update_main_log("Checks & reports complete. No change: {}. Change: {}. First run: {}. "
+                        "Error: {}.\n\n{}\n".format(no_change, change, first, err, "-"*150))
 
 
 class RobotsCheck:
@@ -183,7 +183,8 @@ class RobotsCheck:
                 os.mkdir(self.dir)
             except Exception as e:
                 self.err_message = "Error when creating {} directory. TYPE: {}, DETAILS: {}, " \
-                                   "TRACEBACK:\n{}".format(self.url, type(e), e, get_trace_str(e))
+                                   "TRACEBACK:\n\n{}" \
+                                   "\n".format(self.url, type(e), e, get_trace_str(e))
 
                 unexpected_errors.append(self.err_message)
 
@@ -208,7 +209,8 @@ class RobotsCheck:
             # Anticipated errors caught in download_robotstxt() and logged in self.err_message
             if not self.err_message:
                 self.err_message = "Unexpected error during {} check. TYPE: {}, DETAILS: {}, " \
-                                   "TRACEBACK:\n{}".format(self.url, type(e), e, get_trace_str(e))
+                                   "TRACEBACK:\n\n{}" \
+                                   "\n".format(self.url, type(e), e, get_trace_str(e))
 
                 unexpected_errors.append(self.err_message)
 
@@ -305,8 +307,8 @@ class Report:
                 f.write("{}: {}\n".format(self.timestamp, message))
 
         except Exception as e:
-            err_msg = "Error when updating the site log. TYPE: {}, DETAILS: {}, TRACEBACK:\n" \
-                      "{}".format(type(e), e, get_trace_str(e))
+            err_msg = "Error when updating the site log. TYPE: {}, DETAILS: {}, TRACEBACK:\n\n" \
+                      "{}\n".format(type(e), e, get_trace_str(e))
 
             print(err_msg)
             unexpected_errors.append(err_msg)
@@ -404,8 +406,8 @@ if __name__ == "__main__":
         # TODO: email program owner with summary & unexpected errors
     except Exception as fatal_err:
         # Fatal error during RunChecks init
-        fatal_err_msg = "Fatal error. TYPE: {}, DETAILS: {}, TRACEBACK:\n" \
-                        "{}".format(type(fatal_err), fatal_err, get_trace_str(fatal_err))
+        fatal_err_msg = "Fatal error. TYPE: {}, DETAILS: {}, TRACEBACK:\n\n" \
+                        "{}\n".format(type(fatal_err), fatal_err, get_trace_str(fatal_err))
 
         print(fatal_err_msg)
         update_main_log(fatal_err_msg)
