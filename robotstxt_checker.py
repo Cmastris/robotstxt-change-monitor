@@ -314,6 +314,7 @@ class Report:
 
 class NoChangeReport(Report):
     """Log and print the result (no change) of a single robots.txt check."""
+
     def __init__(self, website, name, email):
         Report.__init__(self, website, name, email)  # TODO: Change to use super
 
@@ -364,7 +365,13 @@ class FirstRunReport(Report):
 
 
 class ErrorReport(Report):
-    # TODO: Complete documentation
+    """Log, print, and email the result (error) of a single robots.txt check.
+
+    Attributes:
+        err_message (str): A description of the error logged during RobotsCheck.
+
+    """
+
     def __init__(self, website, name, email):
         Report.__init__(self, website, name, email)  # TODO: Change to use super
         self.err_message = website.err_message
@@ -376,7 +383,7 @@ class ErrorReport(Report):
         update_main_log(self.err_message)
         print(self.err_message)
         email_subject = "{} Robots.txt Check Error".format(self.name)
-        email_body = self.err_message
+        email_body = get_email_body(self.err_message)  # TODO: update content
         send_email(self.email, email_subject, email_body)
 
 
