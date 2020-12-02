@@ -313,18 +313,15 @@ class Report:
 
 
 class NoChangeReport(Report):
-    # TODO: Complete documentation and add methods
-    # TODO: Add method to print results to the console
+    # TODO: Complete documentation
     def __init__(self, website, name, email):
         Report.__init__(self, website, name, email)  # TODO: Change to use super
 
     def create_reports(self):
-        # TODO: populate method
-        # Update the website log
-        # Update the main log
-        # Print result to the console
-        print("Method create_reports called.")
-        return self
+        """Update the site log and print result."""
+        content = "No changes to {} robots.txt file.".format(self.url)
+        self.update_site_log(content)
+        print(content)
 
 
 class ChangeReport(Report):
