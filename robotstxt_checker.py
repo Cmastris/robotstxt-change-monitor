@@ -51,6 +51,17 @@ def update_main_log(message):
         unexpected_errors.append(err_msg)
 
 
+def get_email_body(main_content):
+    """Return the full email body content, including generic and unique content.
+
+    Args:
+        main_content (str): the unique email content to be inserted into the template.
+
+    """
+    # TODO: populate content
+    return "Hi there,\n{}\nGeneric info".format(main_content)
+
+
 def send_email(address, subject, body):
     # TODO: populate function to send email
     pass
