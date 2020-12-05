@@ -5,24 +5,53 @@
 # TODO: Allow for multiple emails per website
 # TODO: Consider using a DB to manage monitored sites (creation, deletion, email/name changes)
 
+import csv
 import datetime
 import os
 import requests
 import traceback
 
-# TODO: Use CSV file instead and define function to convert into list of tuples
-# Constant describing each monitored URL, website name, and owner email
-MONITORED_SITES = [
-    ["https://github.com/", "Github", "test@hotmail.com"],
-    ["", "No URL", "test@hotmail.com"],
-    ["http://www.reddit.com/", "Reddit HTTP", "test@hotmail.com"],
-                   ]
+# Site check data file location (see sites_from_file() documentation for details)
+MONITORED_SITES = "monitored_sites.csv"
 
 # File location of main log which details check and change history
 MAIN_LOG = "data/main_log.txt"
 
 # Errors which should be investigated
 unexpected_errors = []
+
+
+def sites_from_file(file):
+    """Extract monitored sites data from a CSV and return as a list of lists.
+
+    Args:
+        file (str): file location of a CSV file with the following attributes.
+            - Header row labelling the three columns, as listed below.
+            - url (col1): the absolute URL of the website homepage, with a trailing slash.
+            - name (col2): the website's name identifier (letters/numbers only).
+            - email (col3): the email address of the owner, who will receive alerts.
+
+    """
+    data = []
+    with open(file, 'r') as sites_file:
+        csv_reader = csv.reader(sites_file, delimiter=',')
+        row_num = 0
+        for row in csv_reader:
+            # Skip the header row labels
+            if row_num > 0:
+                try:
+                    data.append([row[0], row[1], row[2]])
+                except Exception as e:
+                    err_msg = "Error, couldn't extract row {} from CSV. TYPE: {}, DETAILS: {}, " \
+                              "TRACEBACK:\n\n{}\n".format(row_num, type(e), e, get_trace_str(e))
+
+                    print(err_msg)
+                    unexpected_errors.append(err_msg)
+                    update_main_log(err_msg)
+
+            row_num += 1
+
+    return data
 
 
 def get_timestamp():
@@ -76,7 +105,7 @@ class RunChecks:
     Attributes:
         sites (list): a list of lists, with each list item in the form: [url, name, email].
             - url (str): the absolute URL of the website homepage, with a trailing slash.
-            - name (str): the website's name identifier.
+            - name (str): the website's name identifier (letters/numbers only).
             - email (str): the email address of the owner, who will receive alerts.
 
     """
@@ -402,10 +431,11 @@ class ErrorReport(Report):
 
 if __name__ == "__main__":
     try:
-        RunChecks(MONITORED_SITES).check_all()
+        sites_data = sites_from_file(MONITORED_SITES)
+        RunChecks(sites_data).check_all()
         # TODO: email program owner with summary & unexpected errors
     except Exception as fatal_err:
-        # Fatal error during RunChecks init
+        # Fatal error during CSV read or RunChecks init
         fatal_err_msg = "Fatal error. TYPE: {}, DETAILS: {}, TRACEBACK:\n\n" \
                         "{}\n".format(type(fatal_err), fatal_err, get_trace_str(fatal_err))
 
