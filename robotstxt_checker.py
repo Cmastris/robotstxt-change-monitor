@@ -369,7 +369,7 @@ class ChangeReport(Report):
     # TODO: Add method to print results to the console
     # TODO: Add method to write an email report
     def __init__(self, website, name, email):
-        Report.__init__(self, website, name, email)  # TODO: Change to use super
+        super().__init__(website, name, email)
         self.old_content = website.old_content
 
     def create_reports(self):
@@ -410,7 +410,7 @@ class ErrorReport(Report):
     """
 
     def __init__(self, website, name, email):
-        Report.__init__(self, website, name, email)  # TODO: Change to use super
+        super().__init__(website, name, email)
         self.err_message = website.err_message
 
     def create_reports(self):
