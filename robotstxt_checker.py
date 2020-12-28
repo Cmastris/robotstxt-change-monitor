@@ -390,15 +390,21 @@ class FirstRunReport(Report):
     # TODO: Add method to write an email report
 
     def create_reports(self):
-        # TODO: populate method
-        # Update the website log
-        # Update the main log
-        # Print result to the console
-        # Record snapshot
-        # Write and send email
-        print("Method create_reports called.")
+        """Update site log, update main log, print result, create snapshot, and send email."""
+        log_content = "First successful check of {} robots.txt file.".format(self.url)
+        self.update_site_log(log_content)
+        update_main_log(log_content)
+        print(log_content)
         self.create_snapshot()
-        return self
+        email_subject = "First {} Robots.txt Check Complete".format(self.name)
+        email_content = "The first successful check of the {} robots.txt file is complete. " \
+                        "The extracted file content is shown below." \
+                        "\n\n-----START OF FILE-----\n\n{}\n\n-----END OF FILE-----\n\n" \
+                        "Going forwards, you'll receive an email if the robots.txt file changes " \
+                        "or if there's an error during the check. Otherwise, you can assume " \
+                        "that the file has not changed.".format(self.url, self.new_content)
+        email_body = get_email_body(email_content)
+        send_email(self.email, email_subject, email_body)
 
 
 class ErrorReport(Report):
