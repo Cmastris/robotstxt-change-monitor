@@ -365,9 +365,8 @@ class NoChangeReport(Report):
 
 
 class ChangeReport(Report):
-    # TODO: Complete documentation and add methods
-    # TODO: Add method to print results to the console
-    # TODO: Add method to write an email report
+    """Log, print, and email the result (robots.txt change) of a single robots.txt check."""
+
     def __init__(self, website, name, email):
         super().__init__(website, name, email)
         self.old_content = website.old_content
