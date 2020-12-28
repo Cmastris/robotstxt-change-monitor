@@ -147,7 +147,6 @@ class RunChecks:
                     report = NoChangeReport(check, name, email)
                     no_change += 1
 
-                print("{} check complete. Initialising {}.".format(url, type(report).__name__))
                 report.create_reports()
 
             except Exception as e:
@@ -162,9 +161,10 @@ class RunChecks:
                 # Skip current check/report if unexpected error
                 continue
 
-        print("All checks and reports complete.")
-        update_main_log("Checks & reports complete. No change: {}. Change: {}. First run: {}. "
-                        "Error: {}.\n\n{}\n".format(no_change, change, first, err, "-"*150))
+        summary = "Checks and reports complete. No change: {}. Change: {}. First run: {}. "\
+                  "Error: {}.".format(no_change, change, first, err)
+        print(summary)
+        update_main_log(summary + "\n\n{}\n".format("-"*150))
 
 
 class RobotsCheck:
@@ -225,7 +225,6 @@ class RobotsCheck:
         """
         if self.err_message:
             # If error/invalid URL during __init__
-            print(self.err_message)
             return self
 
         try:
@@ -242,8 +241,6 @@ class RobotsCheck:
                                    "\n".format(self.url, type(e), e, get_trace_str(e))
 
                 unexpected_errors.append(self.err_message)
-
-            print(self.err_message)
 
         return self
 
@@ -359,9 +356,9 @@ class NoChangeReport(Report):
 
     def create_reports(self):
         """Update the site log and print result."""
-        content = "No changes to {} robots.txt file.".format(self.url)
-        self.update_site_log(content)
-        print(content)
+        log_content = "No change: {}. No changes to robots.txt file.".format(self.url)
+        self.update_site_log(log_content)
+        print(log_content)
 
 
 class ChangeReport(Report):
@@ -373,7 +370,7 @@ class ChangeReport(Report):
 
     def create_reports(self):
         """Update site log, update main log, print result, create snapshot, and send email."""
-        log_content = "Change detected in the {} robots.txt file.".format(self.url)
+        log_content = "Change: {}. Change detected in the robots.txt file.".format(self.url)
         self.update_site_log(log_content)
         update_main_log(log_content)
         print(log_content)
@@ -395,7 +392,7 @@ class FirstRunReport(Report):
 
     def create_reports(self):
         """Update site log, update main log, print result, create snapshot, and send email."""
-        log_content = "First successful check of {} robots.txt file.".format(self.url)
+        log_content = "First run: {}. First successful check of robots.txt file.".format(self.url)
         self.update_site_log(log_content)
         update_main_log(log_content)
         print(log_content)
@@ -426,10 +423,11 @@ class ErrorReport(Report):
 
     def create_reports(self):
         """Update site log, update main log, print result, and send email."""
+        log_content = "Error: {}. {}".format(self.url, self.err_message)
         if os.path.isdir(self.dir):
-            self.update_site_log(self.err_message)
-        update_main_log(self.err_message)
-        print(self.err_message)
+            self.update_site_log(log_content)
+        update_main_log(log_content)
+        print(log_content)
         email_subject = "{} Robots.txt Check Error".format(self.name)
         email_body = get_email_body(self.err_message)  # TODO: update content
         send_email(self.email, email_subject, email_body)
