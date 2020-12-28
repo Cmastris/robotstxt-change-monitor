@@ -373,15 +373,22 @@ class ChangeReport(Report):
         self.old_content = website.old_content
 
     def create_reports(self):
-        # TODO: populate method
-        # Update the website log
-        # Update the main log
-        # Print result to the console
-        # Record snapshot
-        # Write and send email
-        print("Method create_reports called.")
+        """Update site log, update main log, print result, create snapshot, and send email."""
+        log_content = "Change detected in the {} robots.txt file.".format(self.url)
+        self.update_site_log(log_content)
+        update_main_log(log_content)
+        print(log_content)
         self.create_snapshot()
-        return self
+        email_subject = "{} Robots.txt Change".format(self.name)
+        email_content = "A change has been detected in the {} robots.txt file. " \
+                        "The latest and previously recorded file contents are shown below." \
+                        "\n\n-----START OF NEW FILE-----\n\n{}\n\n-----END OF NEW FILE-----" \
+                        "\n\n-----START OF OLD FILE-----\n\n{}\n\n-----END OF OLD FILE-----" \
+                        "".format(self.url, self.new_content, self.old_content)
+
+        email_body = get_email_body(email_content)
+        print(email_body)
+        send_email(self.email, email_subject, email_body)
 
 
 class FirstRunReport(Report):
