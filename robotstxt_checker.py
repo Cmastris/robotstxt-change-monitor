@@ -385,9 +385,7 @@ class ChangeReport(Report):
 
 
 class FirstRunReport(Report):
-    # TODO: Complete documentation and add methods
-    # TODO: Add method to print results to the console
-    # TODO: Add method to write an email report
+    """Log, print, and email the result (first run without error) of a single robots.txt check."""
 
     def create_reports(self):
         """Update site log, update main log, print result, create snapshot, and send email."""
@@ -403,6 +401,7 @@ class FirstRunReport(Report):
                         "Going forwards, you'll receive an email if the robots.txt file changes " \
                         "or if there's an error during the check. Otherwise, you can assume " \
                         "that the file has not changed.".format(self.url, self.new_content)
+
         email_body = get_email_body(email_content)
         send_email(self.email, email_subject, email_body)
 
