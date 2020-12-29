@@ -115,15 +115,22 @@ class RunChecks:
     before initialising the relevant Report subclass to generate logs and communications.
 
     Attributes:
-        sites (list): a list of lists, with each list item in the form: [url, name, email].
+        sites (list): a list of lists, with each list item representing a single site's
+        attributes in the form [url, name, email]. Each attribute is detailed below.
             - url (str): the absolute URL of the website homepage, with a trailing slash.
             - name (str): the website's name identifier (letters/numbers only).
             - email (str): the email address of the owner, who will receive alerts.
+
+        no_change (int): a count of site checks with no robots.txt change.
+        change (int): a count of site checks with a robots.txt change.
+        first_run (int): a count of site checks which were the first successful check.
+        error (int): a count of site checks which could not be completed due to an error.
 
     """
 
     def __init__(self, sites):
         self.sites = sites.copy()
+        self.no_change, self.change, self.first_run, self.error = 0, 0, 0, 0
 
         # If /data doesn't exist yet, create directory and main log file
         if not os.path.isdir('data'):
@@ -132,51 +139,68 @@ class RunChecks:
             f.close()
 
     def check_all(self):
-        """Iterate over all RobotsCheck instances to run change checks and reports."""
-        update_main_log("Starting checks on {} sites.".format(len(self.sites)))
-        print("Starting checks on {} sites.".format(len(self.sites)))
+        """Run robots.txt checks and reports for all sites."""
+        start_content = "Starting checks on {} sites.".format(len(self.sites))
+        update_main_log(start_content)
+        print(start_content)
 
-        no_change, change, first, err = 0, 0, 0, 0
-        for site_check in self.sites:
-            try:
-                url, name, email = site_check
-                url = url.strip().lower()
-                email = email.strip()
+        for site_attributes in self.sites:
+            self.check_site(site_attributes)
 
-                check = RobotsCheck(url)
-                check.run_check()
-
-                if check.err_message:
-                    report = ErrorReport(check, name, email)
-                    err += 1
-                elif check.first_run:
-                    report = FirstRunReport(check, name, email)
-                    first += 1
-                elif check.file_change:
-                    report = ChangeReport(check, name, email)
-                    change += 1
-                else:
-                    report = NoChangeReport(check, name, email)
-                    no_change += 1
-
-                report.create_reports()
-
-            except Exception as e:
-                err_msg = "Unexpected error for site: {}. TYPE: {}, DETAILS: {}, " \
-                          "TRACEBACK:\n\n{}\n".format(site_check, type(e), e, get_trace_str(e))
-
-                print(err_msg)
-                unexpected_errors.append(err_msg)
-                update_main_log(err_msg)
-                # TODO: send email to user
-                err += 1
-                # Skip current check/report if unexpected error
-                continue
-
-        summary = "Checks and reports complete. No change: {}. Change: {}. First run: {}. "\
-                  "Error: {}.".format(no_change, change, first, err)
+        summary = "Checks and reports complete. No change: {}. Change: {}. First run: {}. " \
+                  "Error: {}.".format(self.no_change, self.change, self.first_run, self.error)
         print(summary)
-        update_main_log(summary + "\n\n{}\n".format("-"*150))
+        update_main_log(summary + "\n\n{}\n".format("-" * 150))
+
+        if EMAILS_ENABLED:
+            # TODO: email program owner with summary & unexpected errors
+            pass
+
+    def check_site(self, site_attributes):
+        """Run a robots.txt check and report for a single site.
+
+        Attributes:
+            site_attributes (list): a list representing a single site's attributes
+            in the form [url, name, email]. Each attribute is detailed below.
+                - url (str): the absolute URL of the website homepage, with a trailing slash.
+                - name (str): the website's name identifier (letters/numbers only).
+                - email (str): the email address of the owner, who will receive alerts.
+
+        """
+        try:
+            url, name, email = site_attributes
+            url = url.strip().lower()
+            email = email.strip()
+
+            check = RobotsCheck(url)
+            check.run_check()
+
+            if check.err_message:
+                report = ErrorReport(check, name, email)
+                self.error += 1
+            elif check.first_run:
+                report = FirstRunReport(check, name, email)
+                self.first_run += 1
+            elif check.file_change:
+                report = ChangeReport(check, name, email)
+                self.change += 1
+            else:
+                report = NoChangeReport(check, name, email)
+                self.no_change += 1
+
+            report.create_reports()
+
+        except Exception as e:
+            err_msg = "Unexpected error for site: {}. TYPE: {}, DETAILS: {}, " \
+                      "TRACEBACK:\n\n{}\n".format(site_attributes, type(e), e, get_trace_str(e))
+
+            print(err_msg)
+            unexpected_errors.append(err_msg)
+            update_main_log(err_msg)
+            # TODO: send email to user
+            self.error += 1
+
+    # TODO: create function to reset counts
 
 
 class RobotsCheck:
@@ -453,9 +477,6 @@ def main():
     try:
         sites_data = sites_from_file(MONITORED_SITES)
         RunChecks(sites_data).check_all()
-        if EMAILS_ENABLED:
-            # TODO: email program owner with summary & unexpected errors
-            pass
 
     except Exception as fatal_err:
         # Fatal error during CSV read or RunChecks init
