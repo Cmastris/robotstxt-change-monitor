@@ -100,6 +100,20 @@ def get_email_body(main_content):
            "contact the tool administrator: {}. Thanks!".format(main_content, ADMIN_EMAIL)
 
 
+def get_admin_email_body(main_content):
+    """Return the full email body content, including generic and unique content.
+
+    Args:
+        main_content (str): the unique email content to be inserted into the template.
+
+    """
+    if len(unexpected_errors) == 0:
+        return "Hi there,\n\n{}\n\nThere were no unexpected errors.".format(main_content)
+    else:
+        return "Hi there,\n\n{}\n\nUnexpected errors are listed below:\n\n" \
+               "{}".format(main_content, "\n\n".join(unexpected_errors))
+
+
 def send_email(address, subject, body):
     # TODO: populate function to send email
     if not EMAILS_ENABLED:
@@ -482,11 +496,12 @@ def main():
         RunChecks(sites_data).check_all()
 
     except Exception as fatal_err:
-        # Fatal error during CSV read or RunChecks init
+        # Fatal error during CSV read or RunChecks
         fatal_err_msg = "Fatal error. TYPE: {}, DETAILS: {}, TRACEBACK:\n\n" \
                         "{}\n".format(type(fatal_err), fatal_err, get_trace_str(fatal_err))
 
         print(fatal_err_msg)
+        unexpected_errors.append(fatal_err_msg)
         update_main_log(fatal_err_msg)
         if EMAILS_ENABLED:
             # TODO: email program owner with fatal error alert
