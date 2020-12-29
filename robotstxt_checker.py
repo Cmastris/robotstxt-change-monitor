@@ -448,7 +448,8 @@ class ErrorReport(Report):
         send_email(self.email, email_subject, email_body)
 
 
-if __name__ == "__main__":
+def main():
+    """Run all checks and handle fatal errors."""
     try:
         sites_data = sites_from_file(MONITORED_SITES)
         RunChecks(sites_data).check_all()
@@ -471,3 +472,7 @@ if __name__ == "__main__":
         if not EMAILS_ENABLED:
             print("Note: emails are disabled. Details of the program run have been printed "
                   "and/or logged. Set 'EMAILS_ENABLED' to equal 'True' to send/receive emails.")
+
+
+if __name__ == "__main__":
+    main()
