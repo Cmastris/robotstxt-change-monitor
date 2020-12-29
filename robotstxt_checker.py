@@ -19,7 +19,11 @@ MAIN_LOG = "data/main_log.txt"
 
 # Email address of the program administrator, included as a point of contact in all emails
 # This address will receive a summary report every time checks are run
+# Note: ensure 'EMAILS_ENABLED = True' to send/receive emails
 ADMIN_EMAIL = "email@test.com"
+
+# Toggle ('True' or 'False') whether emails are enabled (to both site owners and program admin)
+EMAILS_ENABLED = True
 
 # Errors which should be investigated
 unexpected_errors = []
@@ -98,6 +102,9 @@ def get_email_body(main_content):
 
 def send_email(address, subject, body):
     # TODO: populate function to send email
+    if not EMAILS_ENABLED:
+        return None
+
     pass
 
 
@@ -445,7 +452,10 @@ if __name__ == "__main__":
     try:
         sites_data = sites_from_file(MONITORED_SITES)
         RunChecks(sites_data).check_all()
-        # TODO: email program owner with summary & unexpected errors
+        if EMAILS_ENABLED:
+            # TODO: email program owner with summary & unexpected errors
+            pass
+
     except Exception as fatal_err:
         # Fatal error during CSV read or RunChecks init
         fatal_err_msg = "Fatal error. TYPE: {}, DETAILS: {}, TRACEBACK:\n\n" \
@@ -453,4 +463,11 @@ if __name__ == "__main__":
 
         print(fatal_err_msg)
         update_main_log(fatal_err_msg)
-        # TODO: email program owner
+        if EMAILS_ENABLED:
+            # TODO: email program owner with fatal error alert
+            pass
+
+    finally:
+        if not EMAILS_ENABLED:
+            print("Note: emails are disabled. Details of the program run have been printed "
+                  "and/or logged. Set 'EMAILS_ENABLED' to equal 'True' to send/receive emails.")
