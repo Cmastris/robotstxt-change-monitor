@@ -164,12 +164,13 @@ class RunChecks:
 
         summary = "Checks and reports complete. No change: {}. Change: {}. First run: {}. " \
                   "Error: {}.".format(self.no_change, self.change, self.first_run, self.error)
+
         print(summary)
         update_main_log(summary + "\n\n{}\n".format("-" * 150))
-
-        if EMAILS_ENABLED:
-            # TODO: email program owner with summary & unexpected errors
-            pass
+        email_subject = "Robots.txt Checks Complete"
+        email_body = get_admin_email_body(summary)
+        print(email_body)
+        send_email(ADMIN_EMAIL, email_subject, email_body)
 
     def check_site(self, site_attributes):
         """Run a robots.txt check and report for a single site.
