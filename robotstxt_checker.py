@@ -17,6 +17,10 @@ MONITORED_SITES = "monitored_sites.csv"
 # File location of main log which details check and change history
 MAIN_LOG = "data/main_log.txt"
 
+# Email address of the program administrator, included as a point of contact in all emails
+# This address will receive a summary report every time checks are run
+ADMIN_EMAIL = "email@test.com"
+
 # Errors which should be investigated
 unexpected_errors = []
 
@@ -87,8 +91,9 @@ def get_email_body(main_content):
         main_content (str): the unique email content to be inserted into the template.
 
     """
-    # TODO: populate content
-    return "Hi there,\n{}\nGeneric info".format(main_content)
+    return "Hi there,\n\n{}\n\nThis is an automated message; please do not reply directly " \
+           "to this email. If you have any questions, bug reports, or feedback, please " \
+           "contact the tool administrator: {}. Thanks!".format(main_content, ADMIN_EMAIL)
 
 
 def send_email(address, subject, body):
