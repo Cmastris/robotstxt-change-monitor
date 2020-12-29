@@ -429,7 +429,10 @@ class ErrorReport(Report):
         update_main_log(log_content)
         print(log_content)
         email_subject = "{} Robots.txt Check Error".format(self.name)
-        email_body = get_email_body(self.err_message)  # TODO: update content
+        email_content = "There was an error while checking the {} robots.txt file. " \
+                        "The check was not completed. The details are shown below.\n\n{}" \
+                        "".format(self.url, self.err_message)
+        email_body = get_email_body(email_content)
         send_email(self.email, email_subject, email_body)
 
 
