@@ -144,6 +144,7 @@ class RunChecks:
         update_main_log(start_content)
         print(start_content)
 
+        self.reset_counts()
         for site_attributes in self.sites:
             self.check_site(site_attributes)
 
@@ -200,7 +201,9 @@ class RunChecks:
             # TODO: send email to user
             self.error += 1
 
-    # TODO: create function to reset counts
+    def reset_counts(self):
+        """Reset all report type counts back to zero."""
+        self.no_change, self.change, self.first_run, self.error = 0, 0, 0, 0
 
 
 class RobotsCheck:
