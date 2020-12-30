@@ -169,7 +169,6 @@ class RunChecks:
         update_main_log(summary + "\n\n{}\n".format("-" * 150))
         email_subject = "Robots.txt Checks Complete"
         email_body = get_admin_email_body(summary)
-        print(email_body)
         send_email(ADMIN_EMAIL, email_subject, email_body)
 
     def check_site(self, site_attributes):
@@ -504,9 +503,11 @@ def main():
         print(fatal_err_msg)
         unexpected_errors.append(fatal_err_msg)
         update_main_log(fatal_err_msg)
-        if EMAILS_ENABLED:
-            # TODO: email program owner with fatal error alert
-            pass
+        email_subject = "Robots.txt Check Fatal Error"
+        email_content = "There was a fatal error during the latest robots.txt checks which " \
+                        "caused the program to terminate unexpectedly."
+        email_body = get_admin_email_body(email_content)
+        send_email(ADMIN_EMAIL, email_subject, email_body)
 
     finally:
         if not EMAILS_ENABLED:
