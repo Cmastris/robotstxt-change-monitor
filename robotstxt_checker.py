@@ -2,8 +2,6 @@
 # TODO: Complete core functionality
 # TODO: Write tests and fix bugs
 # TODO: Provide more details about changes using difflib
-# TODO: Allow for multiple emails per website
-# TODO: Consider using a DB to manage monitored sites (creation, deletion, email/name changes)
 
 import csv
 import datetime
