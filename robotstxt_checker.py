@@ -212,7 +212,15 @@ class RunChecks:
             print(err_msg)
             unexpected_errors.append(err_msg)
             update_main_log(err_msg)
-            # TODO: send email to user
+            email_subject = "Robots.txt Check Error"
+            email_content = "There was an unexpected error while checking or reporting on the " \
+                            "robots.txt file of a site which is associated with your email. " \
+                            "If this is the first check, please ensure all site details " \
+                            "were provided in the correct format. The error details are " \
+                            "shown below.\n\n{}".format(err_msg)
+
+            email_body = get_email_body(email_content)
+            send_email(site_attributes[2].strip(), email_subject, email_body)
             self.error += 1
 
     def reset_counts(self):
