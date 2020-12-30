@@ -1,10 +1,10 @@
 """ Monitor and report changes across multiple website robots.txt files."""
 # TODO: Complete core functionality
 # TODO: Write tests and fix bugs
-# TODO: Provide more details about changes using difflib
 
 import csv
 import datetime
+import difflib
 import os
 import requests
 import traceback
@@ -434,6 +434,7 @@ class ChangeReport(Report):
         update_main_log(log_content)
         print(log_content)
         self.create_snapshot()
+        self.create_diff_file()
         email_subject = "{} Robots.txt Change".format(self.name)
         email_content = "A change has been detected in the {} robots.txt file. " \
                         "The latest and previously recorded file contents are shown below." \
@@ -442,8 +443,23 @@ class ChangeReport(Report):
                         "".format(self.url, self.new_content, self.old_content)
 
         email_body = get_email_body(email_content)
-        print(email_body)
         send_email(self.email, email_subject, email_body)
+
+    def create_diff_file(self):
+        """Create and return the location of an HTML file containing a diff table."""
+        old_list = self.old_content.split('\n')
+        new_list = self.new_content.split('\n')
+        diff_html = difflib.HtmlDiff().make_file(old_list, new_list, "Previous", "New")
+
+        file_name = self.timestamp.replace(",", " T").replace(":", "-") + " Diff.html"
+        diff_file = self.dir + "/snapshots/" + file_name
+        if not os.path.isdir(self.dir + "/snapshots"):
+            os.mkdir(self.dir + "/snapshots")
+
+        with open(diff_file, 'x') as f:
+            f.write(diff_html)
+
+        return diff_file
 
 
 class FirstRunReport(Report):
