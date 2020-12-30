@@ -400,14 +400,16 @@ class Report:
             update_main_log(err_msg)
 
     def create_snapshot(self):
-        """Create a unique text file containing the latest robots.txt content."""
-        file_name = self.timestamp.replace(",", " T").replace(":", "-") + ".txt"
+        """Create and return the location of a text file containing the latest content."""
+        file_name = self.timestamp.replace(",", " T").replace(":", "-") + " Snapshot.txt"
         snapshot_file = self.dir + "/snapshots/" + file_name
         if not os.path.isdir(self.dir + "/snapshots"):
             os.mkdir(self.dir + "/snapshots")
 
         with open(snapshot_file, 'x') as f:
             f.write(self.new_content)
+
+        return snapshot_file
 
 
 class NoChangeReport(Report):
