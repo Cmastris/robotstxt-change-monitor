@@ -3,3 +3,7 @@
 
 # Ignore data input file(s)
 *.csv
+
+# Ignore Gmail API credential files
+*.json
+*.pickle
