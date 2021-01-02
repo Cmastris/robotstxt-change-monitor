@@ -7,6 +7,8 @@ import datetime
 import difflib
 import os
 import requests
+import smtplib
+import ssl
 import traceback
 
 # Site check data file location (see sites_from_file() documentation for details)
@@ -17,11 +19,14 @@ MAIN_LOG = "data/main_log.txt"
 
 # Email address of the program administrator, included as a point of contact in all emails
 # This address will receive a summary report every time checks are run
-# Note: ensure 'EMAILS_ENABLED = True' to send/receive emails
-ADMIN_EMAIL = "email@test.com"
+ADMIN_EMAIL = "test@gmail.com"
+
+# A Gmail address which will send emails
+# Less secure app access must be enabled: https://support.google.com/accounts/answer/6010255
+SENDER_EMAIL = "robotstxtmonitor@gmail.com"
 
 # Toggle ('True' or 'False') whether emails are enabled (to both site owners and program admin)
-EMAILS_ENABLED = True
+EMAILS_ENABLED = False
 
 # Errors which should be investigated
 unexpected_errors = []
@@ -113,11 +118,45 @@ def get_admin_email_body(main_content):
 
 
 def send_email(address, subject, body):
-    # TODO: populate function to send email
+    # TODO: complete and document function to send email
+    # TODO: refactor program to send all emails at once following a single login
+    # TODO: add more specific error handling (e.g. invalid addresses, connection issues)
+    # TODO: include attachments
     if not EMAILS_ENABLED:
         return None
 
-    pass
+    try:
+        message = "Subject: {}\n\n{}".format(subject, body)
+        context = ssl.create_default_context()
+
+        with smtplib.SMTP_SSL("smtp.gmail.com", port=465, context=context) as server:
+            while True:
+                # Allow multiple login attempts until success or user abandonment
+                try:
+                    password = input("Enter {} password and press enter: ".format(SENDER_EMAIL))
+                    server.login(SENDER_EMAIL, password)
+                    break
+
+                except smtplib.SMTPAuthenticationError as e:
+                    answer = input("Email login failed. Try again? ('y'/'n') ")
+                    if answer.lower() != "y":
+                        err_msg = "Email login failed. Please ensure that less secure app " \
+                                  "access is 'On' for the sender email Google account. " \
+                                  "TYPE: {}.\n\nDETAILS:\n\n{}\n\n".format(type(e), e)
+                        print(err_msg)
+                        update_main_log(err_msg)
+                        break
+
+            server.sendmail(SENDER_EMAIL, address, message)
+
+    # Catch all to prevent fatal error; log error to be investigated instead
+    except Exception as e:
+        err_msg = "Error sending email to {}. TYPE: {}. DETAILS:\n\n{}\n\nTRACEBACK:\n\n" \
+                  "{}\n".format(address, type(e), e, get_trace_str(e))
+
+        print(err_msg)
+        unexpected_errors.append(err_msg)
+        update_main_log(err_msg)
 
 
 class RunChecks:
@@ -541,3 +580,5 @@ def main():
 
 if __name__ == "__main__":
     main()
+    # send_email(ADMIN_EMAIL, "Test Email", "This is the test email body.")
+    # send_email(ADMIN_EMAIL, "Test Email 2", "This is the second test email body.")
