@@ -19,14 +19,17 @@ MAIN_LOG = "data/main_log.txt"
 
 # Email address of the program administrator, included as a point of contact in all emails
 # This address will receive a summary report every time checks are run
-ADMIN_EMAIL = "test@gmail.com"
+ADMIN_EMAIL = "robotstxtmonitor@gmail.com"
 
 # A Gmail address which will send emails
 # Less secure app access must be enabled: https://support.google.com/accounts/answer/6010255
 SENDER_EMAIL = "robotstxtmonitor@gmail.com"
 
 # Toggle ('True' or 'False') whether emails are enabled (to both site owners and program admin)
-EMAILS_ENABLED = False
+EMAILS_ENABLED = True
+
+# A list of tuples in the form (address, subject, body)
+emails = []
 
 # Errors which should be investigated
 unexpected_errors = []
@@ -117,18 +120,24 @@ def get_admin_email_body(main_content):
                "{}".format(main_content, "\n\n".join(unexpected_errors))
 
 
-def send_email(address, subject, body):
+def send_emails(emails_list):
+    """Send emails based on a list of tuples in the form (address, subject, body).
+
+    Args:
+        emails_list (list): A list of tuples, with each tuple containing the following data:
+            - address (str): the destination email address
+            - subject (str): the subject line of the email
+            - body (str): the main body content of the email
+
+    """
     # TODO: complete and document function to send email
-    # TODO: refactor program to send all emails at once following a single login
     # TODO: add more specific error handling (e.g. invalid addresses, connection issues)
     # TODO: include attachments
     if not EMAILS_ENABLED:
         return None
 
     try:
-        message = "Subject: {}\n\n{}".format(subject, body)
         context = ssl.create_default_context()
-
         with smtplib.SMTP_SSL("smtp.gmail.com", port=465, context=context) as server:
             while True:
                 # Allow multiple login attempts until success or user abandonment
@@ -147,7 +156,11 @@ def send_email(address, subject, body):
                         update_main_log(err_msg)
                         break
 
-            server.sendmail(SENDER_EMAIL, address, message)
+            print("Sending {} emails...".format(len(emails_list)))
+            for address, subject, body in emails_list:
+                message = "Subject: {}\n\n{}".format(subject, body)
+                server.sendmail(SENDER_EMAIL, address, message)
+                print("Email sent successfully to {} (subject: {}).".format(address, subject))
 
     # Catch all to prevent fatal error; log error to be investigated instead
     except Exception as e:
@@ -206,7 +219,7 @@ class RunChecks:
         update_main_log(summary + "\n\n{}\n".format("-" * 150))
         email_subject = "Robots.txt Checks Complete"
         email_body = get_admin_email_body(summary)
-        send_email(ADMIN_EMAIL, email_subject, email_body)
+        emails.append((ADMIN_EMAIL, email_subject, email_body))
 
     def check_site(self, site_attributes):
         """Run a robots.txt check and report for a single site.
@@ -257,7 +270,7 @@ class RunChecks:
                             "shown below.\n\n{}".format(err_msg)
 
             email_body = get_email_body(email_content)
-            send_email(site_attributes[2].strip(), email_subject, email_body)
+            emails.append((site_attributes[2].strip(), email_subject, email_body))
             self.error += 1
 
     def reset_counts(self):
@@ -484,7 +497,7 @@ class ChangeReport(Report):
                         "".format(self.url, self.new_content, self.old_content)
 
         email_body = get_email_body(email_content)
-        send_email(self.email, email_subject, email_body)
+        emails.append((self.email, email_subject, email_body))
 
     def create_diff_file(self):
         """Create and return the location of an HTML file containing a diff table."""
@@ -522,7 +535,7 @@ class FirstRunReport(Report):
                         "that the file has not changed.".format(self.url, self.new_content)
 
         email_body = get_email_body(email_content)
-        send_email(self.email, email_subject, email_body)
+        emails.append((self.email, email_subject, email_body))
 
 
 class ErrorReport(Report):
@@ -549,7 +562,7 @@ class ErrorReport(Report):
                         "The check was not completed. The details are shown below.\n\n{}" \
                         "".format(self.url, self.err_message)
         email_body = get_email_body(email_content)
-        send_email(self.email, email_subject, email_body)
+        emails.append((self.email, email_subject, email_body))
 
 
 def main():
@@ -570,15 +583,15 @@ def main():
         email_content = "There was a fatal error during the latest robots.txt checks which " \
                         "caused the program to terminate unexpectedly."
         email_body = get_admin_email_body(email_content)
-        send_email(ADMIN_EMAIL, email_subject, email_body)
+        emails.append((ADMIN_EMAIL, email_subject, email_body))
 
     finally:
-        if not EMAILS_ENABLED:
+        if EMAILS_ENABLED:
+            send_emails(emails)
+        else:
             print("Note: emails are disabled. Details of the program run have been printed "
                   "and/or logged. Set 'EMAILS_ENABLED' to equal 'True' to send/receive emails.")
 
 
 if __name__ == "__main__":
     main()
-    # send_email(ADMIN_EMAIL, "Test Email", "This is the test email body.")
-    # send_email(ADMIN_EMAIL, "Test Email 2", "This is the second test email body.")
