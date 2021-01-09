@@ -9,6 +9,7 @@ import os
 import requests
 import smtplib
 import ssl
+import time
 import traceback
 
 # Site check data file location (see sites_from_file() documentation for details)
@@ -161,6 +162,7 @@ def send_emails(emails_list):
                 message = "Subject: {}\n\n{}".format(subject, body)
                 server.sendmail(SENDER_EMAIL, address, message)
                 print("Email sent successfully to {} (subject: {}).".format(address, subject))
+                time.sleep(0.5)
 
     # Catch all to prevent fatal error; log error to be investigated instead
     except Exception as e:
