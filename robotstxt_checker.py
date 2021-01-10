@@ -129,11 +129,12 @@ def send_emails(emails_list):
             - address (str): the destination email address
             - subject (str): the subject line of the email
             - body (str): the main body content of the email
+            - *attachments (str, optional): 0 or more attachment file locations
 
     """
     # TODO: complete and document function to send email
     # TODO: add more specific error handling (e.g. invalid addresses, connection issues)
-    # TODO: include attachments
+    # TODO: pass and include attachments for applicable emails
     if not EMAILS_ENABLED:
         return None
 
@@ -143,6 +144,7 @@ def send_emails(emails_list):
             while True:
                 # Allow multiple login attempts until success or user abandonment
                 try:
+                    # TODO: obscure password
                     password = input("Enter {} password and press enter: ".format(SENDER_EMAIL))
                     server.login(SENDER_EMAIL, password)
                     break
@@ -158,8 +160,12 @@ def send_emails(emails_list):
                         break
 
             print("Sending {} emails...".format(len(emails_list)))
-            for address, subject, body in emails_list:
+            for address, subject, body, *attachments in emails_list:
                 message = "Subject: {}\n\n{}".format(subject, body)
+                for a in attachments:
+                    # TODO: add to email
+                    pass
+
                 server.sendmail(SENDER_EMAIL, address, message)
                 print("Email sent successfully to {} (subject: {}).".format(address, subject))
                 time.sleep(0.5)
