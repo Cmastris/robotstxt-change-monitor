@@ -227,7 +227,7 @@ class RunChecks:
         update_main_log(summary + "\n\n{}\n".format("-" * 150))
         email_subject = "Robots.txt Checks Complete"
         email_body = get_admin_email_body(summary)
-        emails.append((ADMIN_EMAIL, email_subject, email_body))
+        emails.append((ADMIN_EMAIL, email_subject, email_body, MAIN_LOG))
 
     def check_site(self, site_attributes):
         """Run a robots.txt check and report for a single site.
@@ -487,6 +487,7 @@ class ChangeReport(Report):
 
     def __init__(self, website, name, email):
         super().__init__(website, name, email)
+        self.old_file = website.old_file
         self.old_content = website.old_content
 
     def create_reports(self):
@@ -496,7 +497,7 @@ class ChangeReport(Report):
         update_main_log(log_content)
         print(log_content)
         self.create_snapshot()
-        self.create_diff_file()
+        diff_file = self.create_diff_file()
         email_subject = "{} Robots.txt Change".format(self.name)
         email_content = "A change has been detected in the {} robots.txt file. " \
                         "The latest and previously recorded file contents are shown below." \
@@ -505,7 +506,7 @@ class ChangeReport(Report):
                         "".format(self.url, self.new_content, self.old_content)
 
         email_body = get_email_body(email_content)
-        emails.append((self.email, email_subject, email_body))
+        emails.append((self.email, email_subject, email_body, diff_file, self.old_file))
 
     def create_diff_file(self):
         """Create and return the location of an HTML file containing a diff table."""
