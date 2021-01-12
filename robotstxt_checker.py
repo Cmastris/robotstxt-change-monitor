@@ -95,7 +95,7 @@ def update_main_log(message):
         unexpected_errors.append(err_msg)
 
 
-def get_email_body(main_content):
+def get_user_email_body(main_content):
     """Return the full email body content, including generic and unique content.
 
     Args:
@@ -277,7 +277,7 @@ class RunChecks:
                             "were provided in the correct format. The error details are " \
                             "shown below.\n\n{}".format(err_msg)
 
-            email_body = get_email_body(email_content)
+            email_body = get_user_email_body(email_content)
             emails.append((site_attributes[2].strip(), email_subject, email_body))
             self.error += 1
 
@@ -511,7 +511,7 @@ class ChangeReport(Report):
                         "\n\n-----START OF OLD FILE-----\n\n{}\n\n-----END OF OLD FILE-----" \
                         "".format(self.url, self.new_content, self.old_content)
 
-        email_body = get_email_body(email_content)
+        email_body = get_user_email_body(email_content)
         emails.append((self.email, email_subject, email_body, diff_file, self.old_file))
 
     def create_diff_file(self):
@@ -549,7 +549,7 @@ class FirstRunReport(Report):
                         "or if there's an error during the check. Otherwise, you can assume " \
                         "that the file has not changed.".format(self.url, self.new_content)
 
-        email_body = get_email_body(email_content)
+        email_body = get_user_email_body(email_content)
         emails.append((self.email, email_subject, email_body))
 
 
@@ -576,7 +576,7 @@ class ErrorReport(Report):
         email_content = "There was an error while checking the {} robots.txt file. " \
                         "The check was not completed. The details are shown below.\n\n{}" \
                         "".format(self.url, self.err_message)
-        email_body = get_email_body(email_content)
+        email_body = get_user_email_body(email_content)
         emails.append((self.email, email_subject, email_body))
 
 
