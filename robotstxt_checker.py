@@ -29,7 +29,7 @@ SENDER_EMAIL = "robotstxtmonitor@gmail.com"
 # Toggle ('True' or 'False') whether emails are enabled (to both site owners and program admin)
 EMAILS_ENABLED = True
 
-# A list of tuples in the form (address, subject, body)
+# A list of tuples in the form (address, subject, body, *attachments); refer to send_emails()
 emails = []
 
 # Errors which should be investigated
@@ -483,7 +483,13 @@ class NoChangeReport(Report):
 
 
 class ChangeReport(Report):
-    """Log, print, and email the result (robots.txt change) of a single robots.txt check."""
+    """Log, print, and email the result (robots.txt change) of a single robots.txt check.
+
+    Attributes:
+        old_file (str): the file location of the previous check robots.txt content.
+        old_content (str): the previous check robots.txt content.
+
+    """
 
     def __init__(self, website, name, email):
         super().__init__(website, name, email)
@@ -491,7 +497,7 @@ class ChangeReport(Report):
         self.old_content = website.old_content
 
     def create_reports(self):
-        """Update site log, update main log, print result, create snapshot, and send email."""
+        """Update site log, update main log, print result, create snapshot, and prepare email."""
         log_content = "Change: {}. Change detected in the robots.txt file.".format(self.url)
         self.update_site_log(log_content)
         update_main_log(log_content)
@@ -529,7 +535,7 @@ class FirstRunReport(Report):
     """Log, print, and email the result (first run without error) of a single robots.txt check."""
 
     def create_reports(self):
-        """Update site log, update main log, print result, create snapshot, and send email."""
+        """Update site log, update main log, print result, create snapshot, and prepare email."""
         log_content = "First run: {}. First successful check of robots.txt file.".format(self.url)
         self.update_site_log(log_content)
         update_main_log(log_content)
@@ -560,7 +566,7 @@ class ErrorReport(Report):
         self.err_message = website.err_message
 
     def create_reports(self):
-        """Update site log, update main log, print result, and send email."""
+        """Update site log, update main log, print result, and prepare email."""
         log_content = "Error: {}. {}".format(self.url, self.err_message)
         if os.path.isdir(self.dir):
             self.update_site_log(log_content)
