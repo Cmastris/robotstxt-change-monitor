@@ -8,9 +8,9 @@ import difflib
 import os
 import requests
 import smtplib
-import ssl
 import time
 import traceback
+import yagmail
 
 # Site check data file location (see sites_from_file() documentation for details)
 MONITORED_SITES = "monitored_sites.csv"
@@ -121,8 +121,13 @@ def get_admin_email_body(main_content):
                "{}".format(main_content, "\n\n".join(unexpected_errors))
 
 
+def set_email_login():
+    pw = input("Type in {} password and press Enter: ".format(SENDER_EMAIL))
+    yagmail.register(SENDER_EMAIL, pw)
+
+
 def send_emails(emails_list):
-    """Send emails based on a list of tuples in the form (address, subject, body).
+    """Send emails based on a list of tuples in the form (address, subject, body, *attachments).
 
     Args:
         emails_list (list): A list of tuples, with each tuple containing the following data:
@@ -133,47 +138,61 @@ def send_emails(emails_list):
 
     """
     # TODO: complete and document function to send email
-    # TODO: add more specific error handling (e.g. invalid addresses, connection issues)
     # TODO: pass and include attachments for applicable emails
     if not EMAILS_ENABLED:
         return None
 
     try:
-        context = ssl.create_default_context()
-        with smtplib.SMTP_SSL("smtp.gmail.com", port=465, context=context) as server:
-            while True:
-                # Allow multiple login attempts until success or user abandonment
-                try:
-                    # TODO: obscure password
-                    password = input("Enter {} password and press enter: ".format(SENDER_EMAIL))
-                    server.login(SENDER_EMAIL, password)
-                    break
-
-                except smtplib.SMTPAuthenticationError as e:
-                    answer = input("Email login failed. Try again? ('y'/'n') ")
-                    if answer.lower() != "y":
-                        err_msg = "Email login failed. Please ensure that less secure app " \
-                                  "access is 'On' for the sender email Google account. " \
-                                  "TYPE: {}.\n\nDETAILS:\n\n{}\n\n".format(type(e), e)
-                        print(err_msg)
-                        update_main_log(err_msg)
+        with yagmail.SMTP(SENDER_EMAIL) as server:
+            print("Sending {} email(s)...".format(len(emails_list)))
+            valid_login = True
+            for address, subject, body, *attachments in emails_list:
+                # Allow for send re-attempt if original login failed and password updated
+                while valid_login:
+                    try:
+                        server.send(address, subject, body)
+                        print("Email sent to {} (subject: {}).".format(address, subject))
+                        time.sleep(0.5)
+                        # Break out of while loop to move to next email
                         break
 
-            print("Sending {} emails...".format(len(emails_list)))
-            for address, subject, body, *attachments in emails_list:
-                message = "Subject: {}\n\n{}".format(subject, body)
-                for a in attachments:
-                    # TODO: add to email
-                    pass
+                    except smtplib.SMTPAuthenticationError as e:
+                        short_err_msg = "Email login failed. Please ensure that less secure app " \
+                                        "access is 'On' for the sender email Google account and " \
+                                        "that your saved login details are correct."
 
-                server.sendmail(SENDER_EMAIL, address, message)
-                print("Email sent successfully to {} (subject: {}).".format(address, subject))
-                time.sleep(0.5)
+                        print(short_err_msg)
+                        answer = input("Type 'y' and press Enter to update your saved password "
+                                       "and re-attempt the login: ")
+
+                        if answer.lower().strip() == 'y':
+                            set_email_login()
+
+                        else:
+                            err_msg = short_err_msg + "These can be updated using " \
+                                      "set_email_login().\n\n" \
+                                      "TYPE: {}. DETAILS:\n\n{}\n\n".format(type(e), e)
+
+                            print(err_msg)
+                            update_main_log(err_msg)
+                            # Skip send attempts for any subsequent emails
+                            valid_login = False
+
+                    # Catch all to prevent all emails failing; log error to be investigated instead
+                    except Exception as e:
+                        err_msg = "Error sending email to {}. TYPE: {}. DETAILS:\n\n{}\n\n" \
+                              "TRACEBACK:\n\n{}\n".format(address, type(e), e, get_trace_str(e))
+
+                        print(err_msg)
+                        unexpected_errors.append(err_msg)
+                        update_main_log(err_msg)
+                        # Break out of while loop to move to next email
+                        break
 
     # Catch all to prevent fatal error; log error to be investigated instead
     except Exception as e:
-        err_msg = "Error sending email to {}. TYPE: {}. DETAILS:\n\n{}\n\nTRACEBACK:\n\n" \
-                  "{}\n".format(address, type(e), e, get_trace_str(e))
+        err_msg = "Error using email server. TYPE: {}. DETAILS:\n\n{}\n\nTRACEBACK:\n\n" \
+                  "{}\n".format(type(e), e, get_trace_str(e))
 
         print(err_msg)
         unexpected_errors.append(err_msg)
@@ -609,4 +628,6 @@ def main():
 
 
 if __name__ == "__main__":
+    # Use set_email_login() to save login details on first run or if email/password changes:
+    # set_email_login()
     main()
