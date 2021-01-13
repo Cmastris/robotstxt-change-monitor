@@ -31,6 +31,7 @@ EMAILS_ENABLED = True
 
 # A list of tuples in the form (address, subject, body, *attachments); refer to send_emails()
 emails = []
+admin_email = []
 
 # Errors which should be investigated
 unexpected_errors = []
@@ -244,9 +245,11 @@ class RunChecks:
 
         print(summary)
         update_main_log(summary + "\n\n{}\n".format("-" * 150))
+        send_emails(emails)
+
         email_subject = "Robots.txt Checks Complete"
         email_body = get_admin_email_body(summary)
-        emails.append((ADMIN_EMAIL, email_subject, email_body, MAIN_LOG))
+        admin_email.append((ADMIN_EMAIL, email_subject, email_body, MAIN_LOG))
 
     def check_site(self, site_attributes):
         """Run a robots.txt check and report for a single site.
@@ -617,11 +620,11 @@ def main():
         email_content = "There was a fatal error during the latest robots.txt checks which " \
                         "caused the program to terminate unexpectedly."
         email_body = get_admin_email_body(email_content)
-        emails.append((ADMIN_EMAIL, email_subject, email_body))
+        admin_email.append((ADMIN_EMAIL, email_subject, email_body))
 
     finally:
         if EMAILS_ENABLED:
-            send_emails(emails)
+            send_emails(admin_email)
         else:
             print("Note: emails are disabled. Details of the program run have been printed "
                   "and/or logged. Set 'EMAILS_ENABLED' to equal 'True' to send/receive emails.")
