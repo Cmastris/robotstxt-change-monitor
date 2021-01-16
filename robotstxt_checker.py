@@ -1,5 +1,6 @@
 """ Monitor and report changes across multiple website robots.txt files."""
 # TODO: Complete core functionality
+# TODO: Create function to construct standard error strings
 # TODO: Write tests and fix bugs
 
 import csv
@@ -70,10 +71,15 @@ def sites_from_file(file):
     return data
 
 
-def get_timestamp():
-    """Return the current time as a string in the form 'day-month-year, hour:minute'"""
+def get_timestamp(str_format="%d-%m-%y, %H:%M"):
+    """Return the current time as a string (default: 'day-month-year, hour:minute').
+
+    Args:
+        str_format (str): a valid datetime.datetime.strftime format.
+
+    """
     current_time = datetime.datetime.now()
-    return current_time.strftime("%d-%m-%y, %H:%M")
+    return current_time.strftime(str_format)
 
 
 def get_trace_str(exception):
@@ -132,6 +138,35 @@ def get_admin_email_body(main_content):
 def set_email_login():
     pw = input("Type in {} password and press Enter: ".format(SENDER_EMAIL))
     yagmail.register(SENDER_EMAIL, pw)
+
+
+def save_unsent_email(address, subject, body):
+    """Save the key details of an email which could not be sent.
+
+    Args:
+        - address (str): the destination email address
+        - subject (str): the subject line of the email
+        - body (str): the main body content of the email
+
+    """
+    try:
+        if not os.path.isdir('data/_unsent_emails'):
+            os.mkdir('data/_unsent_emails')
+
+        file_name = get_timestamp(str_format="%d-%m-%y T %H-%M-%S") + ".txt"
+        with open('data/_unsent_emails/' + file_name, 'x') as f:
+            f.write(address + "\n\n" + subject + "\n\n" + body)
+
+        print("Unsent email content successfully saved in /data/_unsent_emails/.")
+        time.sleep(1)
+
+    except Exception as e:
+        err_msg = "Error saving unsent email. TYPE: {}, DETAILS: {}, TRACEBACK:\n\n" \
+                  "{}\n".format(type(e), e, get_trace_str(e))
+
+        print(err_msg)
+        unexpected_errors.append(err_msg)
+        update_main_log(err_msg)
 
 
 def send_emails(emails_list):
@@ -194,6 +229,7 @@ def send_emails(emails_list):
                         print(err_msg)
                         unexpected_errors.append(err_msg)
                         update_main_log(err_msg)
+                        save_unsent_email(address, subject, body)
                         # Break out of while loop to move to next email
                         break
 
