@@ -103,6 +103,9 @@ def get_user_email_body(main_content):
         main_content (str): the unique email content to be inserted into the template.
 
     """
+    # Avoid error strings being interpreted as HTML
+    main_content = main_content.replace("<", "{").replace(">", "}")
+
     return "Hi there,\n\n{}\n\nThis is an automated message; please do not reply directly " \
            "to this email. If you have any questions, bug reports, or feedback, please " \
            "contact the tool administrator: {}. Thanks!".format(main_content, ADMIN_EMAIL)
@@ -117,9 +120,13 @@ def get_admin_email_body(main_content):
     """
     if len(unexpected_errors) == 0:
         return "Hi there,\n\n{}\n\nThere were no unexpected errors.".format(main_content)
+
     else:
+        # Avoid error strings being interpreted as HTML
+        email_errs = [e.replace("<", "{").replace(">", "}") for e in unexpected_errors.copy()]
+
         return "Hi there,\n\n{}\n\nUnexpected errors are listed below:\n\n" \
-               "{}".format(main_content, "\n\n".join(unexpected_errors))
+               "{}".format(main_content, "\n\n".join(email_errs))
 
 
 def set_email_login():
