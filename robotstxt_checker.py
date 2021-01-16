@@ -385,26 +385,52 @@ class RobotsCheck:
 
         return self
 
-    def download_robotstxt(self):
-        """Extract and return the current content (str) of the robots.txt file."""
+    def download_robotstxt(self, max_attempts=5, wait=120):
+        """Extract and return the current content (str) of the robots.txt file.
+
+        Args:
+            max_attempts (int): the maximum number of robots.txt URL connection attempts.
+            wait (int): the number of seconds between connection attempts.
+
+        """
         robots_url = self.url + "robots.txt"
-        try:
-            r = requests.get(robots_url, allow_redirects=False, timeout=40)
 
-        except requests.exceptions.Timeout:
-            self.err_message = "{} timed out before sending a valid response.".format(robots_url)
-            raise
+        for attempt in range(max_attempts):
+            attempts_str = " Trying again in {} seconds. " \
+                           "Attempt {} of {}.".format(wait, attempt + 1, max_attempts)
 
-        except requests.exceptions.ConnectionError as e:
-            self.err_message = "There was a connection error when accessing {}. " \
-                "TYPE: {} DETAILS: {}".format(robots_url, type(e), e)
-            raise
+            try:
+                req = requests.get(robots_url, allow_redirects=False, timeout=40)
 
-        if r.status_code != 200:
-            self.err_message = "{} returned a {} status code.".format(robots_url, r.status_code)
-            raise requests.exceptions.HTTPError
+            except requests.exceptions.Timeout as e:
+                err = "{} timed out before sending a valid response.".format(robots_url)
+                if attempt < (max_attempts - 1):
+                    print(err + attempts_str)
+                    time.sleep(wait)
+                else:
+                    # Final connection attempt failed
+                    self.err_message = err + " TYPE: {}\n\nDETAILS: {}".format(type(e), e)
+                    raise
 
-        return r.text
+            except requests.exceptions.ConnectionError as e:
+                err = "There was a connection error when accessing {}.".format(robots_url)
+                if attempt < (max_attempts - 1):
+                    print(err + attempts_str)
+                    time.sleep(wait)
+                else:
+                    # Final connection attempt failed
+                    self.err_message = err + " TYPE: {}\n\nDETAILS: {}".format(type(e), e)
+                    unexpected_errors.append(self.err_message)
+                    raise
+
+            else:
+                # If no exceptions raised
+                if req.status_code != 200:
+                    self.err_message = "{} returned a {} status code." \
+                                       "".format(robots_url, req.status_code)
+                    raise requests.exceptions.HTTPError
+
+                return req.text
 
     def update_records(self, new_extraction):
         """Update the files containing the current and previous robots.txt content.
