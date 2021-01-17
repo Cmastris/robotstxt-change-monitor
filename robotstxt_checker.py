@@ -77,11 +77,6 @@ def get_timestamp(str_format="%d-%m-%y, %H:%M"):
     return current_time.strftime(str_format)
 
 
-def get_trace_str(exception):
-    """Return a str representation of an Exception traceback."""
-    return "".join(traceback.format_tb(exception.__traceback__)).strip()
-
-
 def get_err_str(exception, message, trace=True):
     """Return an error string containing a message and exception details.
 
@@ -92,8 +87,9 @@ def get_err_str(exception, message, trace=True):
 
     """
     if trace:
+        trace_str = "".join(traceback.format_tb(exception.__traceback__)).strip()
         err_str = "{}\nTYPE: {}\nDETAILS: {}\nTRACEBACK:\n\n{}\n" \
-                  "".format(message, type(exception), exception, get_trace_str(exception))
+                  "".format(message, type(exception), exception, trace_str)
     else:
         err_str = "{}\nTYPE: {}\nDETAILS: {}\n".format(message, type(exception), exception)
 
