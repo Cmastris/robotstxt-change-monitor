@@ -96,11 +96,21 @@ def get_err_str(exception, message, trace=True):
     return err_str
 
 
-def update_main_log(message):
-    """Update the main log with a single message (str)."""
+def update_main_log(message, blank_before=False):
+    """Update the main log with a single message.
+
+    Args:
+        message (str): the message content to be logged.
+        blank_before (bool): whether a blank line is added before the message (default=False).
+
+    """
     try:
+        message = "{}: {}\n".format(get_timestamp(), message)
+        if blank_before:
+            message = "\n" + message
+
         with open(MAIN_LOG, 'a') as f:
-            f.write("{}: {}\n".format(get_timestamp(), message))
+            f.write(message)
 
     # Catch all to prevent fatal error; log error to be investigated instead
     except Exception as e:
@@ -207,7 +217,7 @@ def send_emails(emails_list):
 
     try:
         with yagmail.SMTP(SENDER_EMAIL) as server:
-            print("Sending {} email(s)...".format(len(emails_list)))
+            print("\nSending {} email(s)...".format(len(emails_list)))
             valid_login = True
             for address, subject, body, *attachments in emails_list:
                 # Allow for send re-attempt if original login failed and password updated
@@ -296,8 +306,8 @@ class RunChecks:
         summary = "Checks and reports complete. No change: {}. Change: {}. First run: {}. " \
                   "Error: {}.".format(self.no_change, self.change, self.first_run, self.error)
 
-        print(summary)
-        update_main_log(summary + "\n\n{}\n".format("-" * 150))
+        print("\n" + summary)
+        update_main_log(summary + "\n\n{}\n".format("-" * 150), blank_before=True)
         send_emails(emails)
 
         email_subject = "Robots.txt Checks Complete"
