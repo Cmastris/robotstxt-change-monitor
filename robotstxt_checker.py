@@ -1,5 +1,6 @@
 """ Monitor and report changes across multiple website robots.txt files."""
 # TODO: Complete core functionality
+# TODO: check and amend documentation
 # TODO: Write tests and fix bugs
 
 import csv
@@ -548,6 +549,9 @@ class Report:
         self.name = name
         self.email = email
         self.timestamp = get_timestamp()
+
+    def __str__(self):
+        return "{} - {}".format(type(self).__name__, self.url)
 
     def update_site_log(self, message):
         """Update the site log with a single message (str)."""
