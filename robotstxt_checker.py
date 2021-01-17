@@ -418,6 +418,9 @@ class RobotsCheck:
                 self.err_message = get_err_str(e, "Error creating {} directory.".format(self.url))
                 admin_email_errors.append(self.err_message)
 
+    def __str__(self):
+        return "RobotsCheck - {}".format(type(self).__name__, self.url)
+
     def run_check(self):
         """Update the robots.txt file records and check for changes.
 
