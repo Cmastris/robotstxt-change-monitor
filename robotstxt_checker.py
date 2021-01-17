@@ -88,6 +88,7 @@ def sites_from_file(file):
     return data
 
 
+@unexpected_exception_handling
 def get_timestamp(str_format="%d-%m-%y, %H:%M"):
     """Return the current time as a string (default: 'day-month-year, hour:minute').
 
@@ -99,6 +100,7 @@ def get_timestamp(str_format="%d-%m-%y, %H:%M"):
     return current_time.strftime(str_format)
 
 
+@unexpected_exception_handling
 def get_err_str(exception, message, trace=True):
     """Return an error string containing a message and exception details.
 
@@ -158,6 +160,7 @@ def log_error(error_message, print_err=True, log_in_main=True, in_admin_email=Tr
         admin_email_errors.append(error_message)
 
 
+@unexpected_exception_handling
 def get_user_email_body(main_content):
     """Return the full email body content, including generic and unique content.
 
@@ -173,6 +176,7 @@ def get_user_email_body(main_content):
            "contact the tool administrator: {}. Thanks!".format(main_content, ADMIN_EMAIL)
 
 
+@unexpected_exception_handling
 def get_admin_email_body(main_content):
     """Return the full email body content, including generic and unique content.
 
@@ -191,11 +195,13 @@ def get_admin_email_body(main_content):
                "{}".format(main_content, "\n\n".join(email_errs))
 
 
+@unexpected_exception_handling
 def set_email_login():
     pw = input("Type in {} password and press Enter: ".format(SENDER_EMAIL))
     yagmail.register(SENDER_EMAIL, pw)
 
 
+@unexpected_exception_handling
 def save_unsent_email(address, subject, body):
     """Save the key details of an email which could not be sent.
 
@@ -205,22 +211,18 @@ def save_unsent_email(address, subject, body):
         - body (str): the main body content of the email
 
     """
-    try:
-        if not os.path.isdir('data/_unsent_emails'):
-            os.mkdir('data/_unsent_emails')
+    if not os.path.isdir('data/_unsent_emails'):
+        os.mkdir('data/_unsent_emails')
 
-        file_name = get_timestamp(str_format="%d-%m-%y T %H-%M-%S") + ".txt"
-        with open('data/_unsent_emails/' + file_name, 'x') as f:
-            f.write(address + "\n\n" + subject + "\n\n" + body)
+    file_name = get_timestamp(str_format="%d-%m-%y T %H-%M-%S") + ".txt"
+    with open('data/_unsent_emails/' + file_name, 'x') as f:
+        f.write(address + "\n\n" + subject + "\n\n" + body)
 
-        print("Unsent email content successfully saved in /data/_unsent_emails/.")
-        time.sleep(1)
-
-    except Exception as e:
-        err_msg = get_err_str(e, "Error saving unsent email.")
-        log_error(err_msg)
+    print("Unsent email content successfully saved in /data/_unsent_emails/.")
+    time.sleep(1)
 
 
+@unexpected_exception_handling
 def send_emails(emails_list):
     """Send emails based on a list of tuples in the form (address, subject, body, *attachments).
 
@@ -237,52 +239,46 @@ def send_emails(emails_list):
     if not EMAILS_ENABLED:
         return None
 
-    try:
-        with yagmail.SMTP(SENDER_EMAIL) as server:
-            print("\nSending {} email(s)...".format(len(emails_list)))
-            valid_login = True
-            for address, subject, body, *attachments in emails_list:
-                # Allow for send re-attempt if original login failed and password updated
-                while valid_login:
-                    try:
-                        server.send(address, subject, body)
-                        print("Email sent to {} (subject: {}).".format(address, subject))
-                        time.sleep(0.5)
-                        # Break out of while loop to move to next email
-                        break
+    with yagmail.SMTP(SENDER_EMAIL) as server:
+        print("\nSending {} email(s)...".format(len(emails_list)))
+        valid_login = True
+        for address, subject, body, *attachments in emails_list:
+            # Allow for send re-attempt if original login failed and password updated
+            while valid_login:
+                try:
+                    server.send(address, subject, body)
+                    print("Email sent to {} (subject: {}).".format(address, subject))
+                    time.sleep(0.5)
+                    # Break out of while loop to move to next email
+                    break
 
-                    except smtplib.SMTPAuthenticationError as e:
-                        short_err_msg = "Email login failed. Please ensure that less secure app " \
-                                        "access is 'On' for the sender email Google account and " \
-                                        "that your saved login details are correct."
+                except smtplib.SMTPAuthenticationError as e:
+                    short_err_msg = "Email login failed. Please ensure that less secure app " \
+                                    "access is 'On' for the sender email Google account and " \
+                                    "that your saved login details are correct."
 
-                        print(short_err_msg)
-                        answer = input("Type 'y' and press Enter to update your saved password "
-                                       "and re-attempt the login: ")
+                    print(short_err_msg)
+                    answer = input("Type 'y' and press Enter to update your saved password "
+                                   "and re-attempt the login: ")
 
-                        if answer.lower().strip() == 'y':
-                            set_email_login()
+                    if answer.lower().strip() == 'y':
+                        set_email_login()
 
-                        else:
-                            err_msg = get_err_str(e, short_err_msg + "These can be updated using "
-                                                  "set_email_login().", trace=False)
+                    else:
+                        err_msg = get_err_str(e, short_err_msg + "These can be updated using "
+                                              "set_email_login().", trace=False)
 
-                            log_error(err_msg)
-                            # Skip send attempts for any subsequent emails
-                            valid_login = False
-
-                    # Prevent all emails failing; log error and save unsent email instead
-                    except Exception as e:
-                        err_msg = get_err_str(e, "Error sending email to {}.".format(address))
                         log_error(err_msg)
-                        save_unsent_email(address, subject, body)
-                        # Break out of while loop to move to next email
-                        break
+                        # Skip send attempts for any subsequent emails
+                        valid_login = False
 
-    # Catch all to prevent fatal error; log error to be investigated instead
-    except Exception as e:
-        err_msg = get_err_str(e, "Error using email server.")
-        log_error(err_msg)
+                # Prevent all emails failing; log error and save unsent email instead
+                except Exception as e:
+                    err_msg = get_err_str(e, "Error sending email to {}.".format(address))
+                    log_error(err_msg)
+                    save_unsent_email(address, subject, body)
+                    # Break out of while loop to move to next email
+                    break
 
 
 class RunChecks:
@@ -386,6 +382,7 @@ class RunChecks:
             emails.append((site_attributes[2].strip(), email_subject, email_body))
             self.error += 1
 
+    @unexpected_exception_handling
     def reset_counts(self):
         """Reset all report type counts back to zero."""
         self.no_change, self.change, self.first_run, self.error = 0, 0, 0, 0
@@ -577,18 +574,16 @@ class Report:
     def __str__(self):
         return "{} - {}".format(type(self).__name__, self.url)
 
+    @unexpected_exception_handling
     def update_site_log(self, message):
         """Update the site log with a single message (str)."""
-        try:
-            log_file = self.dir + "/log.txt"
-            # Append or create file if it doesn't exist
-            with open(log_file, 'a+') as f:
-                f.write("{}: {}\n".format(self.timestamp, message))
+        log_file = self.dir + "/log.txt"
 
-        except Exception as e:
-            err_msg = get_err_str(e, "Error when updating the {} site log".format(self.url))
-            log_error(err_msg)
+        # Append or create file if it doesn't exist
+        with open(log_file, 'a+') as f:
+            f.write("{}: {}\n".format(self.timestamp, message))
 
+    @unexpected_exception_handling
     def create_snapshot(self):
         """Create and return the location of a text file containing the latest content."""
         file_name = self.timestamp.replace(",", " T").replace(":", "-") + " Snapshot.txt"
@@ -644,6 +639,7 @@ class ChangeReport(Report):
         email_body = get_user_email_body(email_content)
         emails.append((self.email, email_subject, email_body, diff_file, self.old_file))
 
+    @unexpected_exception_handling
     def create_diff_file(self):
         """Create and return the location of an HTML file containing a diff table."""
         old_list = self.old_content.split('\n')
