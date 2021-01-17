@@ -6,6 +6,7 @@
 import csv
 import datetime
 import difflib
+import functools
 import os
 import requests
 import smtplib
@@ -36,6 +37,26 @@ admin_email = []
 
 # Errors which will be sent to ADMIN_EMAIL to be investigated
 admin_email_errors = []
+
+
+def unexpected_exception_handling(func):
+    """Wrap the passed function in a generic try/except block and log any exception."""
+    # Preserve info about original function
+    @functools.wraps(func)
+    def wrapper(*args, **kwargs):
+        try:
+            return func(*args, **kwargs)
+        except Exception as e:
+            err_str = "Unexpected error in function: {}.".format(func.__name__)
+            if len(args) > 0:
+                obj_name = type(args[0]).__name__
+                if ("Report" in obj_name) or ("Check" in obj_name):
+                    err_str += " Class instance: {}".format(args[0])
+
+            err_msg = get_err_str(e, err_str)
+            log_error(err_msg)
+
+    return wrapper
 
 
 def sites_from_file(file):
