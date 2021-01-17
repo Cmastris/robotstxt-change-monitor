@@ -33,8 +33,8 @@ EMAILS_ENABLED = True
 emails = []
 admin_email = []
 
-# Errors which should be investigated
-unexpected_errors = []
+# Errors which will be sent to ADMIN_EMAIL to be investigated
+admin_email_errors = []
 
 
 def sites_from_file(file):
@@ -118,22 +118,22 @@ def update_main_log(message, blank_before=False):
         log_error(err_msg, log_in_main=False)
 
 
-def log_error(error_message, print_err=True, log_in_main=True, log_in_unexpected=True):
-    """Log an error message via print(), update_main_log(), and in unexpected_errors.
+def log_error(error_message, print_err=True, log_in_main=True, in_admin_email=True):
+    """Log an error message via print(), update_main_log(), and in admin_email_errors.
 
     Args:
         error_message (str): the error message to be logged.
         print_err (bool): whether the message should be printed.
         log_in_main (bool): whether the message should be logged in the main log.
-        log_in_unexpected (bool): whether the message should be logged in unexpected_errors.
+        in_admin_email (bool): whether the message should be logged in admin_email_errors.
 
     """
     if print_err:
         print(error_message)
     if log_in_main:
         update_main_log(error_message)
-    if log_in_unexpected:
-        unexpected_errors.append(error_message)
+    if in_admin_email:
+        admin_email_errors.append(error_message)
 
 
 def get_user_email_body(main_content):
@@ -158,14 +158,14 @@ def get_admin_email_body(main_content):
         main_content (str): the unique email content to be inserted into the template.
 
     """
-    if len(unexpected_errors) == 0:
+    if len(admin_email_errors) == 0:
         return "Hi there,\n\n{}\n\nThere were no unexpected errors.".format(main_content)
 
     else:
         # Avoid error strings being interpreted as HTML
-        email_errs = [e.replace("<", "{").replace(">", "}") for e in unexpected_errors.copy()]
+        email_errs = [e.replace("<", "{").replace(">", "}") for e in admin_email_errors.copy()]
 
-        return "Hi there,\n\n{}\n\nUnexpected errors are listed below:\n\n" \
+        return "Hi there,\n\n{}\n\nErrors which may require investigation are listed below:\n\n" \
                "{}".format(main_content, "\n\n".join(email_errs))
 
 
@@ -245,7 +245,7 @@ def send_emails(emails_list):
                             err_msg = get_err_str(e, short_err_msg + "These can be updated using "
                                                   "set_email_login().", trace=False)
 
-                            log_error(err_msg, log_in_unexpected=False)
+                            log_error(err_msg)
                             # Skip send attempts for any subsequent emails
                             valid_login = False
 
@@ -415,7 +415,7 @@ class RobotsCheck:
 
             except Exception as e:
                 self.err_message = get_err_str(e, "Error creating {} directory.".format(self.url))
-                unexpected_errors.append(self.err_message)
+                admin_email_errors.append(self.err_message)
 
     def run_check(self):
         """Update the robots.txt file records and check for changes.
@@ -439,7 +439,7 @@ class RobotsCheck:
                 self.err_message = get_err_str(e, "Unexpected error during {} check."
                                                "".format(self.url))
 
-                unexpected_errors.append(self.err_message)
+                admin_email_errors.append(self.err_message)
 
         return self
 
@@ -478,7 +478,7 @@ class RobotsCheck:
                 else:
                     # Final connection attempt failed
                     self.err_message = get_err_str(e, err)
-                    unexpected_errors.append(self.err_message)
+                    admin_email_errors.append(self.err_message)
                     raise
 
             else:
