@@ -58,12 +58,8 @@ def sites_from_file(file):
                 try:
                     data.append([row[0], row[1], row[2]])
                 except Exception as e:
-                    err_msg = "Error, couldn't extract row {} from CSV. TYPE: {}, DETAILS: {}, " \
-                              "TRACEBACK:\n\n{}\n".format(row_num, type(e), e, get_trace_str(e))
-
-                    print(err_msg)
-                    unexpected_errors.append(err_msg)
-                    update_main_log(err_msg)
+                    err_msg = get_err_str(e, "Couldn't extract row {} from CSV.".format(row_num))
+                    log_error(err_msg)
 
             row_num += 1
 
@@ -112,11 +108,8 @@ def update_main_log(message):
 
     # Catch all to prevent fatal error; log error to be investigated instead
     except Exception as e:
-        err_msg = "Error when updating the main log. TYPE: {}, DETAILS: {}, TRACEBACK:\n\n" \
-                  "{}\n".format(type(e), e, get_trace_str(e))
-
-        print(err_msg)
-        unexpected_errors.append(err_msg)
+        err_msg = get_err_str(e, "Error when updating the main log.")
+        log_error(err_msg, log_in_main=False)
 
 
 def log_error(error_message, print_err=True, log_in_main=True, log_in_unexpected=True):
@@ -196,12 +189,8 @@ def save_unsent_email(address, subject, body):
         time.sleep(1)
 
     except Exception as e:
-        err_msg = "Error saving unsent email. TYPE: {}, DETAILS: {}, TRACEBACK:\n\n" \
-                  "{}\n".format(type(e), e, get_trace_str(e))
-
-        print(err_msg)
-        unexpected_errors.append(err_msg)
-        update_main_log(err_msg)
+        err_msg = get_err_str(e, "Error saving unsent email.")
+        log_error(err_msg)
 
 
 def send_emails(emails_list):
@@ -247,35 +236,25 @@ def send_emails(emails_list):
                             set_email_login()
 
                         else:
-                            err_msg = short_err_msg + "These can be updated using " \
-                                      "set_email_login().\n\n" \
-                                      "TYPE: {}. DETAILS:\n\n{}\n\n".format(type(e), e)
+                            err_msg = get_err_str(e, short_err_msg + "These can be updated using "
+                                                  "set_email_login().", trace=False)
 
-                            print(err_msg)
-                            update_main_log(err_msg)
+                            log_error(err_msg, log_in_unexpected=False)
                             # Skip send attempts for any subsequent emails
                             valid_login = False
 
-                    # Catch all to prevent all emails failing; log error to be investigated instead
+                    # Prevent all emails failing; log error and save unsent email instead
                     except Exception as e:
-                        err_msg = "Error sending email to {}. TYPE: {}. DETAILS:\n\n{}\n\n" \
-                              "TRACEBACK:\n\n{}\n".format(address, type(e), e, get_trace_str(e))
-
-                        print(err_msg)
-                        unexpected_errors.append(err_msg)
-                        update_main_log(err_msg)
+                        err_msg = get_err_str(e, "Error sending email to {}.".format(address))
+                        log_error(err_msg)
                         save_unsent_email(address, subject, body)
                         # Break out of while loop to move to next email
                         break
 
     # Catch all to prevent fatal error; log error to be investigated instead
     except Exception as e:
-        err_msg = "Error using email server. TYPE: {}. DETAILS:\n\n{}\n\nTRACEBACK:\n\n" \
-                  "{}\n".format(type(e), e, get_trace_str(e))
-
-        print(err_msg)
-        unexpected_errors.append(err_msg)
-        update_main_log(err_msg)
+        err_msg = get_err_str(e, "Error using email server.")
+        log_error(err_msg)
 
 
 class RunChecks:
@@ -363,13 +342,11 @@ class RunChecks:
 
             report.create_reports()
 
+        # Prevent all site checks failing; log error to investigate instead
         except Exception as e:
-            err_msg = "Unexpected error for site: {}. TYPE: {}, DETAILS: {}, " \
-                      "TRACEBACK:\n\n{}\n".format(site_attributes, type(e), e, get_trace_str(e))
+            err_msg = get_err_str(e, "Unexpected error for site: {}.".format(site_attributes))
+            log_error(err_msg)
 
-            print(err_msg)
-            unexpected_errors.append(err_msg)
-            update_main_log(err_msg)
             email_subject = "Robots.txt Check Error"
             email_content = "There was an unexpected error while checking or reporting on the " \
                             "robots.txt file of a site which is associated with your email. " \
@@ -429,11 +406,9 @@ class RobotsCheck:
         elif not os.path.isdir(self.dir):
             try:
                 os.mkdir(self.dir)
-            except Exception as e:
-                self.err_message = "Error when creating {} directory. TYPE: {}, DETAILS: {}, " \
-                                   "TRACEBACK:\n\n{}" \
-                                   "\n".format(self.url, type(e), e, get_trace_str(e))
 
+            except Exception as e:
+                self.err_message = get_err_str(e, "Error creating {} directory.".format(self.url))
                 unexpected_errors.append(self.err_message)
 
     def run_check(self):
@@ -455,9 +430,8 @@ class RobotsCheck:
         except Exception as e:
             # Anticipated errors caught in download_robotstxt() and logged in self.err_message
             if not self.err_message:
-                self.err_message = "Unexpected error during {} check. TYPE: {}, DETAILS: {}, " \
-                                   "TRACEBACK:\n\n{}" \
-                                   "\n".format(self.url, type(e), e, get_trace_str(e))
+                self.err_message = get_err_str(e, "Unexpected error during {} check."
+                                               "".format(self.url))
 
                 unexpected_errors.append(self.err_message)
 
@@ -487,7 +461,7 @@ class RobotsCheck:
                     time.sleep(wait)
                 else:
                     # Final connection attempt failed
-                    self.err_message = err + " TYPE: {}\n\nDETAILS: {}".format(type(e), e)
+                    self.err_message = get_err_str(e, err, trace=False)
                     raise
 
             except requests.exceptions.ConnectionError as e:
@@ -497,7 +471,7 @@ class RobotsCheck:
                     time.sleep(wait)
                 else:
                     # Final connection attempt failed
-                    self.err_message = err + " TYPE: {}\n\nDETAILS: {}".format(type(e), e)
+                    self.err_message = get_err_str(e, err)
                     unexpected_errors.append(self.err_message)
                     raise
 
@@ -578,12 +552,8 @@ class Report:
                 f.write("{}: {}\n".format(self.timestamp, message))
 
         except Exception as e:
-            err_msg = "Error when updating the site log. TYPE: {}, DETAILS: {}, TRACEBACK:\n\n" \
-                      "{}\n".format(type(e), e, get_trace_str(e))
-
-            print(err_msg)
-            unexpected_errors.append(err_msg)
-            update_main_log(err_msg)
+            err_msg = get_err_str(e, "Error when updating the {} site log".format(self.url))
+            log_error(err_msg)
 
     def create_snapshot(self):
         """Create and return the location of a text file containing the latest content."""
@@ -714,15 +684,13 @@ def main():
 
     except Exception as fatal_err:
         # Fatal error during CSV read or RunChecks
-        fatal_err_msg = "Fatal error. TYPE: {}, DETAILS: {}, TRACEBACK:\n\n" \
-                        "{}\n".format(type(fatal_err), fatal_err, get_trace_str(fatal_err))
+        fatal_err_msg = get_err_str(fatal_err, "Fatal error.")
+        log_error(fatal_err_msg)
 
-        print(fatal_err_msg)
-        unexpected_errors.append(fatal_err_msg)
-        update_main_log(fatal_err_msg)
         email_subject = "Robots.txt Check Fatal Error"
         email_content = "There was a fatal error during the latest robots.txt checks which " \
                         "caused the program to terminate unexpectedly."
+
         email_body = get_admin_email_body(email_content)
         admin_email.append((ADMIN_EMAIL, email_subject, email_body))
 
