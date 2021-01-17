@@ -119,6 +119,24 @@ def update_main_log(message):
         unexpected_errors.append(err_msg)
 
 
+def log_error(error_message, print_err=True, log_in_main=True, log_in_unexpected=True):
+    """Log an error message via print(), update_main_log(), and in unexpected_errors.
+
+    Args:
+        error_message (str): the error message to be logged.
+        print_err (bool): whether the message should be printed.
+        log_in_main (bool): whether the message should be logged in the main log.
+        log_in_unexpected (bool): whether the message should be logged in unexpected_errors.
+
+    """
+    if print_err:
+        print(error_message)
+    if log_in_main:
+        update_main_log(error_message)
+    if log_in_unexpected:
+        unexpected_errors.append(error_message)
+
+
 def get_user_email_body(main_content):
     """Return the full email body content, including generic and unique content.
 
