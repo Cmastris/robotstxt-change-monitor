@@ -1,6 +1,5 @@
 """ Monitor and report changes across multiple website robots.txt files."""
 # TODO: Complete core functionality
-# TODO: Create function to construct standard error strings
 # TODO: Write tests and fix bugs
 
 import csv
@@ -85,6 +84,24 @@ def get_timestamp(str_format="%d-%m-%y, %H:%M"):
 def get_trace_str(exception):
     """Return a str representation of an Exception traceback."""
     return "".join(traceback.format_tb(exception.__traceback__)).strip()
+
+
+def get_err_str(exception, message, trace=True):
+    """Return an error string containing a message and exception details.
+
+    Args:
+        exception (obj): the exception object caught.
+        message (str): the base error message.
+        trace (bool): whether the traceback is included (default=True).
+
+    """
+    if trace:
+        err_str = "{}\nTYPE: {}\nDETAILS: {}\nTRACEBACK:\n\n{}\n" \
+                  "".format(message, type(exception), exception, get_trace_str(exception))
+    else:
+        err_str = "{}\nTYPE: {}\nDETAILS: {}\n".format(message, type(exception), exception)
+
+    return err_str
 
 
 def update_main_log(message):
