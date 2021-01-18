@@ -1,6 +1,5 @@
 """ Monitor and report changes across multiple website robots.txt files."""
-# TODO: Complete core functionality
-# TODO: check and amend documentation
+# TODO: Check and amend documentation
 # TODO: Write tests and fix bugs
 
 import csv
@@ -234,8 +233,6 @@ def send_emails(emails_list):
             - *attachments (str, optional): 0 or more attachment file locations
 
     """
-    # TODO: complete and document function to send email
-    # TODO: pass and include attachments for applicable emails
     if not EMAILS_ENABLED:
         return None
 
@@ -246,7 +243,7 @@ def send_emails(emails_list):
             # Allow for send re-attempt if original login failed and password updated
             while valid_login:
                 try:
-                    server.send(address, subject, body)
+                    server.send(to=address, subject=subject, contents=body, attachments=attachments)
                     print("Email sent to {} (subject: {}).".format(address, subject))
                     time.sleep(0.5)
                     # Break out of while loop to move to next email
