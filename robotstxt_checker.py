@@ -160,6 +160,12 @@ def log_error(error_message, print_err=True, log_in_main=True, in_admin_email=Tr
 
 
 @unexpected_exception_handling
+def replace_angle_brackets(content):
+    """Replace angle brackets with curly brackets to avoid interpretation as HTML."""
+    return content.replace("<", "{").replace(">", "}")
+
+
+@unexpected_exception_handling
 def get_user_email_body(main_content):
     """Return the full email body content, including generic and unique content.
 
@@ -168,7 +174,6 @@ def get_user_email_body(main_content):
 
     """
     # Avoid error strings being interpreted as HTML
-    main_content = main_content.replace("<", "{").replace(">", "}")
     email_link = "<a href=\"mailto:{}\">{}</a>".format(ADMIN_EMAIL, ADMIN_EMAIL)
 
     return "Hi there,\n\n{}\n\nThis is an automated message; please do not reply directly " \
@@ -189,7 +194,7 @@ def get_admin_email_body(main_content):
 
     else:
         # Avoid error strings being interpreted as HTML
-        email_errs = [e.replace("<", "{").replace(">", "}") for e in admin_email_errors.copy()]
+        email_errs = [replace_angle_brackets(e) for e in admin_email_errors.copy()]
 
         return "Hi there,\n\n{}\n\nErrors which may require investigation are listed below:\n\n" \
                "{}".format(main_content, "\n\n".join(email_errs))
@@ -376,6 +381,7 @@ class RunChecks:
                             "were provided in the correct format. The error details are " \
                             "shown below.\n\n{}".format(err_msg)
 
+            email_content = replace_angle_brackets(email_content)
             email_body = get_user_email_body(email_content)
             emails.append((site_attributes[2].strip(), email_subject, email_body))
             self.error += 1
@@ -700,6 +706,8 @@ class ErrorReport(Report):
         email_content = "There was an error while checking the {} robots.txt file. " \
                         "The check was not completed. The details are shown below.\n\n{}" \
                         "".format(self.url, self.err_message)
+
+        email_content = replace_angle_brackets(email_content)
         email_body = get_user_email_body(email_content)
         emails.append((self.email, email_subject, email_body))
 
