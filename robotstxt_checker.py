@@ -169,10 +169,11 @@ def get_user_email_body(main_content):
     """
     # Avoid error strings being interpreted as HTML
     main_content = main_content.replace("<", "{").replace(">", "}")
+    email_link = "<a href=\"mailto:{}\">{}</a>".format(ADMIN_EMAIL, ADMIN_EMAIL)
 
     return "Hi there,\n\n{}\n\nThis is an automated message; please do not reply directly " \
            "to this email. If you have any questions, bug reports, or feedback, please " \
-           "contact the tool administrator: {}. Thanks!".format(main_content, ADMIN_EMAIL)
+           "contact the tool administrator: {}. Thanks!\n".format(main_content, email_link)
 
 
 @unexpected_exception_handling
