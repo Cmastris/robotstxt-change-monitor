@@ -590,7 +590,7 @@ class Report:
     @unexpected_exception_handling
     def create_snapshot(self):
         """Create and return the location of a text file containing the latest content."""
-        file_name = self.timestamp.replace(",", " T").replace(":", "-") + " Snapshot.txt"
+        file_name = self.timestamp.replace(",", " T").replace(":", "-") + " Robots.txt Snapshot.txt"
         snapshot_file = self.dir + "/snapshots/" + file_name
         if not os.path.isdir(self.dir + "/snapshots"):
             os.mkdir(self.dir + "/snapshots")
@@ -616,6 +616,7 @@ class ChangeReport(Report):
 
     Attributes:
         old_file (str): the file location of the previous check robots.txt content.
+        new_file (str): the file location of the latest check robots.txt content.
         old_content (str): the previous check robots.txt content.
 
     """
@@ -623,6 +624,7 @@ class ChangeReport(Report):
     def __init__(self, website, name, email):
         super().__init__(website, name, email)
         self.old_file = website.old_file
+        self.new_file = website.new_file
         self.old_content = website.old_content
 
     def create_reports(self):
@@ -634,14 +636,15 @@ class ChangeReport(Report):
         self.create_snapshot()
         diff_file = self.create_diff_file()
         email_subject = "{} Robots.txt Change".format(self.name)
+        link = "<a href=\"{}\">{}</a>".format(self.url + "robots.txt", self.url + "robots.txt")
         email_content = "A change has been detected in the {} robots.txt file. " \
-                        "The latest and previously recorded file contents are shown below." \
-                        "\n\n-----START OF NEW FILE-----\n\n{}\n\n-----END OF NEW FILE-----" \
-                        "\n\n-----START OF OLD FILE-----\n\n{}\n\n-----END OF OLD FILE-----" \
-                        "".format(self.url, self.new_content, self.old_content)
+                        "Copies of the old file and new file are attached. " \
+                        "\n\nView the live robots.txt file: {}" \
+                        "".format(self.url, link)
 
         email_body = get_user_email_body(email_content)
-        emails.append((self.email, email_subject, email_body, diff_file, self.old_file))
+        emails.append((self.email, email_subject, email_body,
+                       self.old_file, self.new_file, diff_file))
 
     @unexpected_exception_handling
     def create_diff_file(self):
@@ -650,7 +653,7 @@ class ChangeReport(Report):
         new_list = self.new_content.split('\n')
         diff_html = difflib.HtmlDiff().make_file(old_list, new_list, "Previous", "New")
 
-        file_name = self.timestamp.replace(",", " T").replace(":", "-") + " Diff.html"
+        file_name = self.timestamp.replace(",", " T").replace(":", "-") + " Robots.txt Diff.html"
         diff_file = self.dir + "/snapshots/" + file_name
         if not os.path.isdir(self.dir + "/snapshots"):
             os.mkdir(self.dir + "/snapshots")
@@ -673,11 +676,11 @@ class FirstRunReport(Report):
         self.create_snapshot()
         email_subject = "First {} Robots.txt Check Complete".format(self.name)
         email_content = "The first successful check of the {} robots.txt file is complete. " \
-                        "The extracted file content is shown below." \
-                        "\n\n-----START OF FILE-----\n\n{}\n\n-----END OF FILE-----\n\n" \
                         "Going forwards, you'll receive an email if the robots.txt file changes " \
                         "or if there's an error during the check. Otherwise, you can assume " \
-                        "that the file has not changed.".format(self.url, self.new_content)
+                        "that the file has not changed.\n\nThe extracted content is shown below:" \
+                        "\n\n-----START OF FILE-----\n\n{}\n\n-----END OF FILE-----\n\n" \
+                        "".format(self.url, self.new_content)
 
         email_body = get_user_email_body(email_content)
         emails.append((self.email, email_subject, email_body))
