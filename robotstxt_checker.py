@@ -323,7 +323,7 @@ class RunChecks:
                   "Error: {}.".format(self.no_change, self.change, self.first_run, self.error)
 
         print("\n" + summary)
-        update_main_log(summary + "\n\n{}\n".format("-" * 150), blank_before=True)
+        update_main_log(summary, blank_before=True)
         send_emails(emails)
 
         email_subject = "Robots.txt Checks Complete"
@@ -728,6 +728,8 @@ def main():
         else:
             print("Note: emails are disabled. Details of the program run have been printed "
                   "and/or logged. Set 'EMAILS_ENABLED' to equal 'True' to send/receive emails.")
+
+        update_main_log("\n\n{}END OF RUN{}\n".format("-"*20, "-"*20))
 
 
 if __name__ == "__main__":
