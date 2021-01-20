@@ -229,6 +229,7 @@ def save_unsent_email(address, subject, body):
         f.write(address + "\n\n" + subject + "\n\n" + body)
 
     print("Unsent email content successfully saved in /data/_unsent_emails/.")
+    # Ensure timestamp is unique
     time.sleep(1)
 
 
@@ -247,6 +248,7 @@ def send_emails(emails_list):
     if not EMAILS_ENABLED:
         return None
 
+    # Provide sender email password as second argument if not saving on the OS
     with yagmail.SMTP(SENDER_EMAIL) as server:
         print("\nSending {} email(s)...".format(len(emails_list)))
         valid_login = True
