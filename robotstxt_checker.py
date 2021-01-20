@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 """ Monitor and report changes across multiple website robots.txt files."""
 # TODO: Check and amend documentation
 # TODO: Write tests and fix bugs
