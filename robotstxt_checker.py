@@ -14,11 +14,14 @@ import time
 import traceback
 import yagmail
 
+# Directories/files are relative to script location by default; change if necessary.
+PATH = ""
+
 # Site check data file location (see sites_from_file() documentation for details)
-MONITORED_SITES = "monitored_sites.csv"
+MONITORED_SITES = PATH + "monitored_sites.csv"
 
 # File location of main log which details check and change history
-MAIN_LOG = "data/main_log.txt"
+MAIN_LOG = PATH + "data/main_log.txt"
 
 # Email address of the program administrator, included as a point of contact in all emails
 # This address will receive a summary report every time checks are run
@@ -217,11 +220,12 @@ def save_unsent_email(address, subject, body):
         - body (str): the main body content of the email
 
     """
-    if not os.path.isdir('data/_unsent_emails'):
-        os.mkdir('data/_unsent_emails')
+    unsent_dir = PATH + 'data/_unsent_emails'
+    if not os.path.isdir(unsent_dir):
+        os.mkdir(unsent_dir)
 
     file_name = get_timestamp(str_format="%d-%m-%y T %H-%M-%S") + ".txt"
-    with open('data/_unsent_emails/' + file_name, 'x') as f:
+    with open(unsent_dir + "/" + file_name, 'x') as f:
         f.write(address + "\n\n" + subject + "\n\n" + body)
 
     print("Unsent email content successfully saved in /data/_unsent_emails/.")
@@ -310,8 +314,8 @@ class RunChecks:
         self.no_change, self.change, self.first_run, self.error = 0, 0, 0, 0
 
         # If /data doesn't exist yet, create directory and main log file
-        if not os.path.isdir('data'):
-            os.mkdir('data')
+        if not os.path.isdir(PATH + 'data'):
+            os.mkdir(PATH + 'data')
             f = open(MAIN_LOG, 'x')
             f.close()
 
@@ -419,10 +423,11 @@ class RobotsCheck:
         self.first_run = False
         self.err_message = None
         self.file_change = False
-        if self.url[4] == 's':
-            self.dir = "data/" + self.url[8:-1]
+        # Use site domain name as directory name
+        if self.url[:5] == 'https':
+            self.dir = PATH + "data/" + self.url[8:-1]
         else:
-            self.dir = "data/" + self.url[7:-1]
+            self.dir = PATH + "data/" + self.url[7:-1]
         self.old_file = self.dir + "/old_file.txt"
         self.new_file = self.dir + "/new_file.txt"
         self.old_content = None
