@@ -548,9 +548,12 @@ class RobotsCheck:
             self.first_run = True
 
         # Overwrite the contents of new_file with new_extraction
-        self.new_content = new_extraction
         with open(self.new_file, 'w') as new:
-            new.write(self.new_content)
+            new.write(new_extraction)
+
+        # Read content from both files to avoid reading-related comparison inconsistencies
+        with open(self.new_file, 'r') as new:
+            self.new_content = new.read()
 
     def check_diff(self):
         """Check for file differences and update self.file_change."""
