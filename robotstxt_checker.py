@@ -719,7 +719,8 @@ class ErrorReport(Report):
     def create_reports(self):
         """Update site log, update main log, print result, and prepare email."""
         log_content = "Error: {}. {}".format(self.url, self.err_message)
-        if os.path.isdir(self.dir):
+        # Only create/update site log if site directory exists
+        if (os.path.isdir(self.dir)) and (self.dir[-5:] != "data/"):
             self.update_site_log(log_content)
         update_main_log(log_content)
         print(log_content)
