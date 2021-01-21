@@ -430,8 +430,8 @@ class RobotsCheck:
             self.dir = PATH + "data/" + self.url[8:-1]
         else:
             self.dir = PATH + "data/" + self.url[7:-1]
-        self.old_file = self.dir + "/old_file.txt"
-        self.new_file = self.dir + "/new_file.txt"
+        self.old_file = self.dir + "/program_files/old_file.txt"
+        self.new_file = self.dir + "/program_files/new_file.txt"
         self.old_content = None
         self.new_content = None
 
@@ -439,13 +439,14 @@ class RobotsCheck:
             self.err_message = "{} is not a valid site URL. The site URL must be absolute and " \
                                "end in a slash, e.g. 'https://www.example.com/'.".format(url)
 
-        # If URL is valid and site directory doesn't exist, create directory
+        # If URL is valid and site directory doesn't exist, create required directories
         elif not os.path.isdir(self.dir):
             try:
                 os.mkdir(self.dir)
+                os.mkdir(self.dir + "/program_files")
 
             except Exception as e:
-                self.err_message = get_err_str(e, "Error creating {} directory.".format(self.url))
+                self.err_message = get_err_str(e, "Error creating {} directories.".format(self.url))
                 admin_email_errors.append(self.err_message)
 
     def __str__(self):
