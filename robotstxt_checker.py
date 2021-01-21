@@ -123,16 +123,20 @@ def get_err_str(exception, message, trace=True):
     return err_str
 
 
-def update_main_log(message, blank_before=False):
+def update_main_log(message, blank_before=False, timestamp=True):
     """Update the main log with a single message.
 
     Args:
         message (str): the message content to be logged.
         blank_before (bool): whether a blank line is added before the message (default=False).
+        timestamp (bool): whether a timestamp is added before the message (default=True).
 
     """
     try:
-        message = "{}: {}\n".format(get_timestamp(), message)
+        message = message + "\n"
+        if timestamp:
+            message = get_timestamp() + ": " + message
+
         if blank_before:
             message = "\n" + message
 
@@ -228,7 +232,9 @@ def save_unsent_email(address, subject, body):
     with open(unsent_dir + "/" + file_name, 'x') as f:
         f.write(address + "\n\n" + subject + "\n\n" + body)
 
-    print("Unsent email content successfully saved in /data/_unsent_emails/.")
+    success_msg = "Unsent email content successfully saved in /data/_unsent_emails/."
+    print(success_msg)
+    update_main_log(success_msg)
     # Ensure timestamp is unique
     time.sleep(1)
 
@@ -752,7 +758,7 @@ def main():
             print("Note: emails are disabled. Details of the program run have been printed "
                   "and/or logged. Set 'EMAILS_ENABLED' to equal 'True' to send/receive emails.")
 
-        update_main_log("\n\n{}END OF RUN{}\n".format("-"*20, "-"*20))
+        update_main_log("\n{}END OF RUN{}\n".format("-"*20, "-"*20), timestamp=False)
 
 
 if __name__ == "__main__":
