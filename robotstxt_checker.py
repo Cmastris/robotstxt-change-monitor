@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
-""" Monitor and report changes across multiple website robots.txt files."""
-# TODO: Check and amend documentation
-# TODO: Write tests and fix bugs
+""" Monitor changes across one or more robots.txt files."""
+
+# TODO: Split into multiple files (main, checks, reporting, helpers)
+# TODO: Move email functions and variables into Emails class
 
 import csv
 import datetime
@@ -14,16 +15,16 @@ import time
 import traceback
 import yagmail
 
-# Directories/files are relative to script location by default; change if necessary.
+# Directories/files are relative to script location by default; change if necessary
 PATH = ""
 
-# Site check data file location (see sites_from_file() documentation for details)
+# The file location of the monitored sites CSV (see 'sites_from_file()' documentation for details)
 MONITORED_SITES = PATH + "monitored_sites.csv"
 
-# File location of main log which details check and change history
+# The file location of the main log .txt file
 MAIN_LOG = PATH + "data/main_log.txt"
 
-# Email address of the program administrator, included as a point of contact in all emails
+# The email address of the program administrator, included as a point of contact in all emails
 # This address will receive a summary report every time checks are run
 ADMIN_EMAIL = "robotstxtmonitor@gmail.com"
 
@@ -31,20 +32,20 @@ ADMIN_EMAIL = "robotstxtmonitor@gmail.com"
 # Less secure app access must be enabled: https://support.google.com/accounts/answer/6010255
 SENDER_EMAIL = "robotstxtmonitor@gmail.com"
 
-# Toggle ('True' or 'False') whether emails are enabled (to both site owners and program admin)
+# Toggle ('True' or 'False') whether emails are enabled (both site admins and the program admin)
 EMAILS_ENABLED = True
 
-# A list of tuples in the form (address, subject, body, *attachments); refer to send_emails()
+# A list of tuples containing email data (see 'send_emails()' documentation for details)
 emails = []
 admin_email = []
 
-# Errors which will be sent to ADMIN_EMAIL to be investigated
+# Errors which will be sent to 'ADMIN_EMAIL' to be investigated
 admin_email_errors = []
 
 
 def unexpected_exception_handling(func):
     """Wrap the passed function in a generic try/except block and log any exception."""
-    # Preserve info about original function
+    # Preserve info about the original function
     @functools.wraps(func)
     def wrapper(*args, **kwargs):
         try:
@@ -66,11 +67,11 @@ def sites_from_file(file):
     """Extract monitored sites data from a CSV and return as a list of lists.
 
     Args:
-        file (str): file location of a CSV file with the following attributes.
+        file (str): file location of a CSV file with the following attributes:
             - Header row labelling the three columns, as listed below.
             - url (col1): the absolute URL of the website homepage, with a trailing slash.
             - name (col2): the website's name identifier (letters/numbers only).
-            - email (col3): the email address of the owner, who will receive alerts.
+            - email (col3): the email address of the site admin, who will receive alerts.
 
     """
     data = []
@@ -96,7 +97,7 @@ def get_timestamp(str_format="%d-%m-%y, %H:%M"):
     """Return the current time as a string (default: 'day-month-year, hour:minute').
 
     Args:
-        str_format (str): a valid datetime.datetime.strftime format.
+        str_format (str): a valid 'datetime.datetime.strftime' format.
 
     """
     current_time = datetime.datetime.now()
@@ -124,12 +125,12 @@ def get_err_str(exception, message, trace=True):
 
 
 def update_main_log(message, blank_before=False, timestamp=True):
-    """Update the main log with a single message.
+    """Update the 'MAIN_LOG' text file with a single message.
 
     Args:
         message (str): the message content to be logged.
         blank_before (bool): whether a blank line is added before the message (default=False).
-        timestamp (bool): whether a timestamp is added before the message (default=True).
+        timestamp (bool): whether the message starts with a timestamp (default=True).
 
     """
     try:
@@ -143,20 +144,19 @@ def update_main_log(message, blank_before=False, timestamp=True):
         with open(MAIN_LOG, 'a') as f:
             f.write(message)
 
-    # Catch all to prevent fatal error; log error to be investigated instead
     except Exception as e:
         err_msg = get_err_str(e, "Error when updating the main log.")
         log_error(err_msg, log_in_main=False)
 
 
 def log_error(error_message, print_err=True, log_in_main=True, in_admin_email=True):
-    """Log an error message via print(), update_main_log(), and in admin_email_errors.
+    """Log an error message via print(), update_main_log(), and in 'admin_email_errors'.
 
     Args:
         error_message (str): the error message to be logged.
         print_err (bool): whether the message should be printed.
         log_in_main (bool): whether the message should be logged in the main log.
-        in_admin_email (bool): whether the message should be logged in admin_email_errors.
+        in_admin_email (bool): whether the message should be logged in 'admin_email_errors'.
 
     """
     if print_err:
@@ -169,19 +169,23 @@ def log_error(error_message, print_err=True, log_in_main=True, in_admin_email=Tr
 
 @unexpected_exception_handling
 def replace_angle_brackets(content):
-    """Replace angle brackets with curly brackets to avoid interpretation as HTML."""
+    """Replace angle brackets with curly brackets to avoid interpretation as HTML.
+
+    Args:
+        content (str): the content containing angle brackets to replace().
+
+    """
     return content.replace("<", "{").replace(">", "}")
 
 
 @unexpected_exception_handling
 def get_user_email_body(main_content):
-    """Return the full email body content, including generic and unique content.
+    """Return the full site admin email body content, including generic and unique content.
 
     Args:
         main_content (str): the unique email content to be inserted into the template.
 
     """
-    # Avoid error strings being interpreted as HTML
     email_link = "<a href=\"mailto:{}\">{}</a>".format(ADMIN_EMAIL, ADMIN_EMAIL)
 
     return "Hi there,\n\n{}\n\nThis is an automated message; please do not reply directly " \
@@ -191,7 +195,7 @@ def get_user_email_body(main_content):
 
 @unexpected_exception_handling
 def get_admin_email_body(main_content):
-    """Return the full email body content, including generic and unique content.
+    """Return the full admin email body content, including generic and unique content.
 
     Args:
         main_content (str): the unique email content to be inserted into the template.
@@ -201,7 +205,6 @@ def get_admin_email_body(main_content):
         return "Hi there,\n\n{}\n\nThere were no unexpected errors.".format(main_content)
 
     else:
-        # Avoid error strings being interpreted as HTML
         email_errs = [replace_angle_brackets(e) for e in admin_email_errors.copy()]
 
         return "Hi there,\n\n{}\n\nErrors which may require investigation are listed below:\n\n" \
@@ -210,18 +213,20 @@ def get_admin_email_body(main_content):
 
 @unexpected_exception_handling
 def set_email_login():
+    """Save or update the 'SENDER_EMAIL' login details using the keyring library."""
     pw = input("Type in {} password and press Enter: ".format(SENDER_EMAIL))
+    # A wrapper for the Python keyring library
     yagmail.register(SENDER_EMAIL, pw)
 
 
 @unexpected_exception_handling
 def save_unsent_email(address, subject, body):
-    """Save the key details of an email which could not be sent.
+    """Save the key details of an email which couldn't be sent to a timestamped .txt file.
 
     Args:
-        - address (str): the destination email address
-        - subject (str): the subject line of the email
-        - body (str): the main body content of the email
+        address (str): the destination email address.
+        subject (str): the subject line of the email.
+        body (str): the main body content of the email.
 
     """
     unsent_dir = PATH + 'data/_unsent_emails'
@@ -245,27 +250,27 @@ def send_emails(emails_list):
 
     Args:
         emails_list (list): A list of tuples, with each tuple containing the following data:
-            - address (str): the destination email address
-            - subject (str): the subject line of the email
-            - body (str): the main body content of the email
-            - *attachments (str, optional): 0 or more attachment file locations
+            - address (str): the destination email address.
+            - subject (str): the subject line of the email.
+            - body (str): the main body content of the email.
+            - *attachments (str, optional): 0 or more attachment file locations.
 
     """
     if not EMAILS_ENABLED:
         return None
 
-    # Provide sender email password as second argument if not saving on the OS
+    # Provide sender email password as second argument if not saving via 'set_email_login()'
     with yagmail.SMTP(SENDER_EMAIL) as server:
         print("\nSending {} email(s)...".format(len(emails_list)))
         valid_login = True
         for address, subject, body, *attachments in emails_list:
-            # Allow for send re-attempt if original login failed and password updated
+            # Re-attempt send if login failed and password updated via 'set_email_login()'
             while valid_login:
                 try:
                     server.send(to=address, subject=subject, contents=body, attachments=attachments)
                     print("Email sent to {} (subject: {}).".format(address, subject))
                     time.sleep(0.5)
-                    # Break out of while loop to move to next email
+                    # Break out of 'while valid_login' loop to move to next email
                     break
 
                 except smtplib.SMTPAuthenticationError as e:
@@ -274,6 +279,7 @@ def send_emails(emails_list):
                                     "that your saved login details are correct."
 
                     print(short_err_msg)
+                    # Provide option of updating password and re-attempting send
                     answer = input("Type 'y' and press Enter to update your saved password "
                                    "and re-attempt the login: ")
 
@@ -288,7 +294,7 @@ def send_emails(emails_list):
                         # Skip send attempts for any subsequent emails
                         valid_login = False
 
-                # Prevent all emails failing; log error and save unsent email instead
+                # Prevent all emails failing; log error and save unsent email
                 except Exception as e:
                     err_msg = get_err_str(e, "Error sending email to {}.".format(address))
                     log_error(err_msg)
@@ -308,7 +314,7 @@ class RunChecks:
         attributes in the form [url, name, email]. Each attribute is detailed below.
             - url (str): the absolute URL of the website homepage, with a trailing slash.
             - name (str): the website's name identifier (letters/numbers only).
-            - email (str): the email address of the owner, who will receive alerts.
+            - email (str): the email address of the site admin, who will receive alerts.
 
         no_change (int): a count of site checks with no robots.txt change.
         change (int): a count of site checks with a robots.txt change.
@@ -356,7 +362,7 @@ class RunChecks:
             in the form [url, name, email]. Each attribute is detailed below.
                 - url (str): the absolute URL of the website homepage, with a trailing slash.
                 - name (str): the website's name identifier (letters/numbers only).
-                - email (str): the email address of the owner, who will receive alerts.
+                - email (str): the email address of the site admin, who will receive alerts.
 
         """
         try:
@@ -382,7 +388,7 @@ class RunChecks:
 
             report.create_reports()
 
-        # Prevent all site checks failing; log error to investigate instead
+        # Prevent all site checks failing; log error to investigate
         except Exception as e:
             err_msg = get_err_str(e, "Unexpected error for site: {}.".format(site_attributes))
             log_error(err_msg)
@@ -421,13 +427,14 @@ class RobotsCheck:
         dir (str): the location of the directory containing website data.
         old_file (str): the file location of the previous check robots.txt content.
         new_file (str): the file location of the latest check robots.txt content.
-        old_content (str): the previous check robots.txt content.
-        new_content (str): the latest check robots.txt content.
+        old_content (str): the previous check robots.txt content (assigned in 'update_records()').
+        new_content (str): the latest check robots.txt content (assigned in 'update_records()').
 
     """
 
     def __init__(self, url):
         self.url = url
+        # Updated where appropriate as the check progresses
         self.first_run = False
         self.err_message = None
         self.file_change = False
@@ -438,6 +445,7 @@ class RobotsCheck:
             self.dir = PATH + "data/" + self.url[7:-1]
         self.old_file = self.dir + "/program_files/old_file.txt"
         self.new_file = self.dir + "/program_files/new_file.txt"
+        # Content assigned during 'update_records()' after a successful check
         self.old_content = None
         self.new_content = None
 
@@ -475,7 +483,7 @@ class RobotsCheck:
                 self.check_diff()
 
         except Exception as e:
-            # Anticipated errors caught in download_robotstxt() and logged in self.err_message
+            # Anticipated errors caught in 'download_robotstxt()' and logged in 'self.err_message'
             if not self.err_message:
                 self.err_message = get_err_str(e, "Unexpected error during {} check."
                                                "".format(self.url))
@@ -529,15 +537,17 @@ class RobotsCheck:
                                        "".format(robots_url, req.status_code)
                     raise requests.exceptions.HTTPError
 
+                # URL was successfully reached and returned a 200 status code
                 return req.text
 
     def update_records(self, new_extraction):
-        """Update the files containing the current and previous robots.txt content.
+        """Update the files and attributes containing the current and previous robots.txt content.
 
-        If the robots.txt file has been successfully checked previously,
-        overwrite old_file with the contents of new_file (from the previous check).
-        Otherwise, create the content files and set first_run = True.
-        Then, add the new robots.txt extraction content to new_file.
+        If the robots.txt file has been successfully checked previously, overwrite the contents
+        of 'self.old_file' with the contents of 'self.new_file' (from the previous check).
+        Otherwise, create the content files and set 'self.first_run' = True. Then, add the new
+        robots.txt extraction content to 'self.new_file'. During this process, 'self.old_content'
+        and 'self.new_content' are also updated by reading from the updated files.
 
         Args:
             new_extraction (str): the current content of the robots.txt file.
@@ -565,23 +575,21 @@ class RobotsCheck:
             self.new_content = new.read()
 
     def check_diff(self):
-        """Check for file differences and update self.file_change."""
+        """Check for robots.txt content differences and update 'self.file_change'."""
         if self.old_content != self.new_content:
             self.file_change = True
 
 
 class Report:
-    """Report/log the results of a single robots.txt check.
-
-    This is a base class; more specific child classes should be instantiated.
+    """Report the results of a single robots.txt check (base class; do not instantiate).
 
     Attributes:
         url (str): the absolute URL of the website homepage, with a trailing slash.
         dir (str): the name of the directory containing website data.
         new_content (str): the latest check robots.txt content.
-        name (str): the website's name identifier.
-        email (str): the email address of the owner, who will receive alerts.
-        timestamp (str): the (approximate) time of the check.
+        name (str): the website's name identifier (letters/numbers only).
+        email (str): the email address of the site admin, who will receive alerts.
+        timestamp (str): the approximate time of the check.
 
     """
 
@@ -598,10 +606,10 @@ class Report:
 
     @unexpected_exception_handling
     def update_site_log(self, message):
-        """Update the site log with a single message (str)."""
+        """Update the site log text file with a single message (str)."""
         log_file = self.dir + "/log.txt"
 
-        # Append or create file if it doesn't exist
+        # Create file if it doesn't exist, otherwise append content to the end
         with open(log_file, 'a+') as f:
             f.write("{}: {}\n".format(self.timestamp, message))
 
@@ -620,7 +628,7 @@ class Report:
 
 
 class NoChangeReport(Report):
-    """Log and print the result (no change) of a single robots.txt check."""
+    """Log and print the result (no robots.txt change) of a single robots.txt check."""
 
     def create_reports(self):
         """Update the site log and print result."""
@@ -646,7 +654,7 @@ class ChangeReport(Report):
         self.old_content = website.old_content
 
     def create_reports(self):
-        """Update site log, update main log, print result, create snapshot, and prepare email."""
+        """Update site logs, print result, create snapshot, create diff, and prepare email."""
         log_content = "Change: {}. Change detected in the robots.txt file.".format(self.url)
         self.update_site_log(log_content)
         update_main_log(log_content)
