@@ -1,5 +1,5 @@
-# Robots.txt Monitor - Quickly Discover Unwanted Changes
-**Never miss a robots.txt change again.** 
+# Robots.txt Monitor
+### Never miss a robots.txt change again.
 An accidental "Disallow: /" can happen to anyone, but it doesn't need to linger unnoticed.
 Whether you're a webmaster or SEO, this simple tool can help you quickly discover unwelcome robots.txt changes.
 
@@ -16,10 +16,13 @@ Whether you're a webmaster or SEO, this simple tool can help you quickly discove
 3. The check result is logged/printed and categorised as either "first run", "no change", "change", or "error".
 4. Timestamped snapshots ("first run" and "change") and diffs ("change") are saved in the relevant site directory.
 5. If enabled, site-specific email alerts are sent out ("first run", "change", and "error").
-5. If enabled, an administrative email alert is sent out detailing overall check results and any unexpected errors encountered.
+6. If enabled, an administrative email alert is sent out detailing overall check results and any unexpected errors.
 
 
 ## Setup
+TODO
+
+## Maintenance
 TODO
 
 ## FAQs
