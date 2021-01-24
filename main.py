@@ -1,48 +1,21 @@
 #!/usr/bin/env python3
 """ Monitor changes across one or more robots.txt files."""
 
-# TODO: Move email error list and log functions to logs.py file
-
 import csv
-import datetime
 import difflib
-import functools
 import os
 import smtplib
 import time
-import traceback
 
 import requests
 import yagmail
 
 import config
+import logs
 
 # A list of tuples containing email data (see 'send_emails()' documentation for details)
 emails = []
 admin_email = []
-
-# Errors which will be sent to 'config.ADMIN_EMAIL' to be investigated
-admin_email_errors = []
-
-
-def unexpected_exception_handling(func):
-    """Wrap the passed function in a generic try/except block and log any exception."""
-    # Preserve info about the original function
-    @functools.wraps(func)
-    def wrapper(*args, **kwargs):
-        try:
-            return func(*args, **kwargs)
-        except Exception as e:
-            err_str = "Unexpected error in function: {}.".format(func.__name__)
-            if len(args) > 0:
-                obj_name = type(args[0]).__name__
-                if ("Report" in obj_name) or ("Check" in obj_name):
-                    err_str += " Class instance: {}".format(args[0])
-
-            err_msg = get_err_str(e, err_str)
-            log_error(err_msg)
-
-    return wrapper
 
 
 def sites_from_file(file):
@@ -66,90 +39,16 @@ def sites_from_file(file):
                 try:
                     data.append([row[0], row[1], row[2]])
                 except Exception as e:
-                    err_msg = get_err_str(e, "Couldn't extract row {} from CSV.".format(row_num))
-                    log_error(err_msg)
+                    err_msg = logs.get_err_str(e, "Couldn't extract row {} from CSV."
+                                               "".format(row_num))
+                    logs.log_error(err_msg)
 
             row_num += 1
 
     return data
 
 
-@unexpected_exception_handling
-def get_timestamp(str_format="%d-%m-%y, %H:%M"):
-    """Return the current time as a string (default: 'day-month-year, hour:minute').
-
-    Args:
-        str_format (str): a valid 'datetime.datetime.strftime' format.
-
-    """
-    current_time = datetime.datetime.now()
-    return current_time.strftime(str_format)
-
-
-@unexpected_exception_handling
-def get_err_str(exception, message, trace=True):
-    """Return an error string containing a message and exception details.
-
-    Args:
-        exception (obj): the exception object caught.
-        message (str): the base error message.
-        trace (bool): whether the traceback is included (default=True).
-
-    """
-    if trace:
-        trace_str = "".join(traceback.format_tb(exception.__traceback__)).strip()
-        err_str = "{}\nTYPE: {}\nDETAILS: {}\nTRACEBACK:\n\n{}\n" \
-                  "".format(message, type(exception), exception, trace_str)
-    else:
-        err_str = "{}\nTYPE: {}\nDETAILS: {}\n".format(message, type(exception), exception)
-
-    return err_str
-
-
-def update_main_log(message, blank_before=False, timestamp=True):
-    """Update the 'config.MAIN_LOG' text file with a single message.
-
-    Args:
-        message (str): the message content to be logged.
-        blank_before (bool): whether a blank line is added before the message (default=False).
-        timestamp (bool): whether the message starts with a timestamp (default=True).
-
-    """
-    try:
-        message = message + "\n"
-        if timestamp:
-            message = get_timestamp() + ": " + message
-
-        if blank_before:
-            message = "\n" + message
-
-        with open(config.MAIN_LOG, 'a') as f:
-            f.write(message)
-
-    except Exception as e:
-        err_msg = get_err_str(e, "Error when updating the main log.")
-        log_error(err_msg, log_in_main=False)
-
-
-def log_error(error_message, print_err=True, log_in_main=True, in_admin_email=True):
-    """Log an error message via print(), update_main_log(), and in 'admin_email_errors'.
-
-    Args:
-        error_message (str): the error message to be logged.
-        print_err (bool): whether the message should be printed.
-        log_in_main (bool): whether the message should be logged in the main log.
-        in_admin_email (bool): whether the message should be logged in 'admin_email_errors'.
-
-    """
-    if print_err:
-        print(error_message)
-    if log_in_main:
-        update_main_log(error_message)
-    if in_admin_email:
-        admin_email_errors.append(error_message)
-
-
-@unexpected_exception_handling
+@logs.unexpected_exception_handling
 def replace_angle_brackets(content):
     """Replace angle brackets with curly brackets to avoid interpretation as HTML.
 
@@ -160,7 +59,7 @@ def replace_angle_brackets(content):
     return content.replace("<", "{").replace(">", "}")
 
 
-@unexpected_exception_handling
+@logs.unexpected_exception_handling
 def get_user_email_body(main_content):
     """Return the full site admin email body content, including generic and unique content.
 
@@ -175,7 +74,7 @@ def get_user_email_body(main_content):
            "contact the tool administrator: {}. Thanks!\n".format(main_content, email_link)
 
 
-@unexpected_exception_handling
+@logs.unexpected_exception_handling
 def get_admin_email_body(main_content):
     """Return the full admin email body content, including generic and unique content.
 
@@ -183,17 +82,17 @@ def get_admin_email_body(main_content):
         main_content (str): the unique email content to be inserted into the template.
 
     """
-    if len(admin_email_errors) == 0:
+    if len(logs.admin_email_errors) == 0:
         return "Hi there,\n\n{}\n\nThere were no unexpected errors.".format(main_content)
 
     else:
-        email_errs = [replace_angle_brackets(e) for e in admin_email_errors.copy()]
+        email_errs = [replace_angle_brackets(e) for e in logs.admin_email_errors.copy()]
 
         return "Hi there,\n\n{}\n\nErrors which may require investigation are listed below:\n\n" \
                "{}".format(main_content, "\n\n".join(email_errs))
 
 
-@unexpected_exception_handling
+@logs.unexpected_exception_handling
 def set_email_login():
     """Save or update the 'config.SENDER_EMAIL' login details using the keyring library."""
     pw = input("Type in {} password and press Enter: ".format(config.SENDER_EMAIL))
@@ -201,7 +100,7 @@ def set_email_login():
     yagmail.register(config.SENDER_EMAIL, pw)
 
 
-@unexpected_exception_handling
+@logs.unexpected_exception_handling
 def save_unsent_email(address, subject, body):
     """Save the key details of an email which couldn't be sent to a timestamped .txt file.
 
@@ -215,18 +114,18 @@ def save_unsent_email(address, subject, body):
     if not os.path.isdir(unsent_dir):
         os.mkdir(unsent_dir)
 
-    file_name = get_timestamp(str_format="%d-%m-%y T %H-%M-%S") + ".txt"
+    file_name = logs.get_timestamp(str_format="%d-%m-%y T %H-%M-%S") + ".txt"
     with open(unsent_dir + "/" + file_name, 'x') as f:
         f.write(address + "\n\n" + subject + "\n\n" + body)
 
     success_msg = "Unsent email content successfully saved in /data/_unsent_emails/."
     print(success_msg)
-    update_main_log(success_msg)
+    logs.update_main_log(success_msg)
     # Ensure timestamp is unique
     time.sleep(1)
 
 
-@unexpected_exception_handling
+@logs.unexpected_exception_handling
 def send_emails(emails_list):
     """Send emails based on a list of tuples in the form (address, subject, body, *attachments).
 
@@ -269,17 +168,17 @@ def send_emails(emails_list):
                         set_email_login()
 
                     else:
-                        err_msg = get_err_str(e, short_err_msg + "These can be updated using "
-                                              "set_email_login().", trace=False)
+                        err_msg = logs.get_err_str(e, short_err_msg + "These can be updated using "
+                                                   "set_email_login().", trace=False)
 
-                        log_error(err_msg)
+                        logs.log_error(err_msg)
                         # Skip send attempts for any subsequent emails
                         valid_login = False
 
                 # Prevent all emails failing; log error and save unsent email
                 except Exception as e:
-                    err_msg = get_err_str(e, "Error sending email to {}.".format(address))
-                    log_error(err_msg)
+                    err_msg = logs.get_err_str(e, "Error sending email to {}.".format(address))
+                    logs.log_error(err_msg)
                     save_unsent_email(address, subject, body)
                     # Break out of while loop to move to next email
                     break
@@ -318,7 +217,7 @@ class RunChecks:
     def check_all(self):
         """Run robots.txt checks and reports for all sites."""
         start_content = "Starting checks on {} sites.".format(len(self.sites))
-        update_main_log(start_content)
+        logs.update_main_log(start_content)
         print(start_content)
 
         self.reset_counts()
@@ -329,7 +228,7 @@ class RunChecks:
                   "Error: {}.".format(self.no_change, self.change, self.first_run, self.error)
 
         print("\n" + summary)
-        update_main_log(summary, blank_before=True)
+        logs.update_main_log(summary, blank_before=True)
         send_emails(emails)
 
         email_subject = "Robots.txt Checks Complete"
@@ -372,8 +271,8 @@ class RunChecks:
 
         # Prevent all site checks failing; log error to investigate
         except Exception as e:
-            err_msg = get_err_str(e, "Unexpected error for site: {}.".format(site_attributes))
-            log_error(err_msg)
+            err_msg = logs.get_err_str(e, "Unexpected error for site: {}.".format(site_attributes))
+            logs.log_error(err_msg)
 
             email_subject = "Robots.txt Check Error"
             email_content = "There was an unexpected error while checking or reporting on the " \
@@ -387,7 +286,7 @@ class RunChecks:
             emails.append((site_attributes[2].strip(), email_subject, email_body))
             self.error += 1
 
-    @unexpected_exception_handling
+    @logs.unexpected_exception_handling
     def reset_counts(self):
         """Reset all report type counts back to zero."""
         self.no_change, self.change, self.first_run, self.error = 0, 0, 0, 0
@@ -442,8 +341,9 @@ class RobotsCheck:
                 os.mkdir(self.dir + "/program_files")
 
             except Exception as e:
-                self.err_message = get_err_str(e, "Error creating {} directories.".format(self.url))
-                admin_email_errors.append(self.err_message)
+                self.err_message = logs.get_err_str(e, "Error creating {} directories."
+                                                       "".format(self.url))
+                logs.admin_email_errors.append(self.err_message)
 
     def __str__(self):
         return "RobotsCheck - {}".format(type(self).__name__, self.url)
@@ -467,10 +367,10 @@ class RobotsCheck:
         except Exception as e:
             # Anticipated errors caught in 'download_robotstxt()' and logged in 'self.err_message'
             if not self.err_message:
-                self.err_message = get_err_str(e, "Unexpected error during {} check."
-                                               "".format(self.url))
+                self.err_message = logs.get_err_str(e, "Unexpected error during {} check."
+                                                    "".format(self.url))
 
-                admin_email_errors.append(self.err_message)
+                logs.admin_email_errors.append(self.err_message)
 
         return self
 
@@ -498,7 +398,7 @@ class RobotsCheck:
                     time.sleep(wait)
                 else:
                     # Final connection attempt failed
-                    self.err_message = get_err_str(e, err, trace=False)
+                    self.err_message = logs.get_err_str(e, err, trace=False)
                     raise
 
             except requests.exceptions.ConnectionError as e:
@@ -508,8 +408,8 @@ class RobotsCheck:
                     time.sleep(wait)
                 else:
                     # Final connection attempt failed
-                    self.err_message = get_err_str(e, err)
-                    admin_email_errors.append(self.err_message)
+                    self.err_message = logs.get_err_str(e, err)
+                    logs.admin_email_errors.append(self.err_message)
                     raise
 
             else:
@@ -581,12 +481,12 @@ class Report:
         self.new_content = website.new_content
         self.name = name
         self.email = email
-        self.timestamp = get_timestamp()
+        self.timestamp = logs.get_timestamp()
 
     def __str__(self):
         return "{} - {}".format(type(self).__name__, self.url)
 
-    @unexpected_exception_handling
+    @logs.unexpected_exception_handling
     def update_site_log(self, message):
         """Update the site log text file with a single message (str)."""
         log_file = self.dir + "/log.txt"
@@ -595,7 +495,7 @@ class Report:
         with open(log_file, 'a+') as f:
             f.write("{}: {}\n".format(self.timestamp, message))
 
-    @unexpected_exception_handling
+    @logs.unexpected_exception_handling
     def create_snapshot(self):
         """Create and return the location of a text file containing the latest content."""
         file_name = self.timestamp.replace(",", " T").replace(":", "-") + " Robots.txt Snapshot.txt"
@@ -639,7 +539,7 @@ class ChangeReport(Report):
         """Update site logs, print result, create snapshot, create diff, and prepare email."""
         log_content = "Change: {}. Change detected in the robots.txt file.".format(self.url)
         self.update_site_log(log_content)
-        update_main_log(log_content)
+        logs.update_main_log(log_content)
         print(log_content)
         self.create_snapshot()
         diff_file = self.create_diff_file()
@@ -654,7 +554,7 @@ class ChangeReport(Report):
         emails.append((self.email, email_subject, email_body,
                        self.old_file, self.new_file, diff_file))
 
-    @unexpected_exception_handling
+    @logs.unexpected_exception_handling
     def create_diff_file(self):
         """Create and return the location of an HTML file containing a diff table."""
         old_list = self.old_content.split('\n')
@@ -679,7 +579,7 @@ class FirstRunReport(Report):
         """Update site log, update main log, print result, create snapshot, and prepare email."""
         log_content = "First run: {}. First successful check of robots.txt file.".format(self.url)
         self.update_site_log(log_content)
-        update_main_log(log_content)
+        logs.update_main_log(log_content)
         print(log_content)
         self.create_snapshot()
         email_subject = "First {} Robots.txt Check Complete".format(self.name)
@@ -712,7 +612,7 @@ class ErrorReport(Report):
         # Only create/update site log if site directory exists
         if (os.path.isdir(self.dir)) and (self.dir[-5:] != "data/"):
             self.update_site_log(log_content)
-        update_main_log(log_content)
+        logs.update_main_log(log_content)
         print(log_content)
         email_subject = "{} Robots.txt Check Error".format(self.name)
         email_content = "There was an error while checking the {} robots.txt file. " \
@@ -732,8 +632,8 @@ def main():
 
     except Exception as fatal_err:
         # Fatal error during CSV read or RunChecks
-        fatal_err_msg = get_err_str(fatal_err, "Fatal error.")
-        log_error(fatal_err_msg)
+        fatal_err_msg = logs.get_err_str(fatal_err, "Fatal error.")
+        logs.log_error(fatal_err_msg)
 
         email_subject = "Robots.txt Check Fatal Error"
         email_content = "There was a fatal error during the latest robots.txt checks which " \
@@ -749,7 +649,7 @@ def main():
             print("Note: emails are disabled. Details of the program run have been printed "
                   "and/or logged. Set 'EMAILS_ENABLED' to equal 'True' to send/receive emails.")
 
-        update_main_log("\n{}END OF RUN{}\n".format("-"*20, "-"*20), timestamp=False)
+        logs.update_main_log("\n{}END OF RUN{}\n".format("-"*20, "-"*20), timestamp=False)
 
 
 if __name__ == "__main__":
