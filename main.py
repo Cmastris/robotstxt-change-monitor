@@ -1,45 +1,27 @@
 #!/usr/bin/env python3
 """ Monitor changes across one or more robots.txt files."""
 
-# TODO: Split into multiple files (main, checks, reporting, helpers)
-# TODO: Move email functions and variables into Emails class
+# TODO: Move email error list and log functions to logs.py file
 
 import csv
 import datetime
 import difflib
 import functools
 import os
-import requests
 import smtplib
 import time
 import traceback
+
+import requests
 import yagmail
 
-# Directories/files are relative to script location by default; change if necessary
-PATH = ""
-
-# The file location of the monitored sites CSV (see 'sites_from_file()' documentation for details)
-MONITORED_SITES = PATH + "monitored_sites.csv"
-
-# The file location of the main log .txt file
-MAIN_LOG = PATH + "data/main_log.txt"
-
-# The email address of the program administrator, included as a point of contact in all emails
-# This address will receive a summary report every time checks are run
-ADMIN_EMAIL = "robotstxtmonitor@gmail.com"
-
-# A Gmail address which will send emails
-# Less secure app access must be enabled: https://support.google.com/accounts/answer/6010255
-SENDER_EMAIL = "robotstxtmonitor@gmail.com"
-
-# Toggle ('True' or 'False') whether emails are enabled (both site admins and the program admin)
-EMAILS_ENABLED = True
+import config
 
 # A list of tuples containing email data (see 'send_emails()' documentation for details)
 emails = []
 admin_email = []
 
-# Errors which will be sent to 'ADMIN_EMAIL' to be investigated
+# Errors which will be sent to 'config.ADMIN_EMAIL' to be investigated
 admin_email_errors = []
 
 
@@ -125,7 +107,7 @@ def get_err_str(exception, message, trace=True):
 
 
 def update_main_log(message, blank_before=False, timestamp=True):
-    """Update the 'MAIN_LOG' text file with a single message.
+    """Update the 'config.MAIN_LOG' text file with a single message.
 
     Args:
         message (str): the message content to be logged.
@@ -141,7 +123,7 @@ def update_main_log(message, blank_before=False, timestamp=True):
         if blank_before:
             message = "\n" + message
 
-        with open(MAIN_LOG, 'a') as f:
+        with open(config.MAIN_LOG, 'a') as f:
             f.write(message)
 
     except Exception as e:
@@ -186,7 +168,7 @@ def get_user_email_body(main_content):
         main_content (str): the unique email content to be inserted into the template.
 
     """
-    email_link = "<a href=\"mailto:{}\">{}</a>".format(ADMIN_EMAIL, ADMIN_EMAIL)
+    email_link = "<a href=\"mailto:{}\">{}</a>".format(config.ADMIN_EMAIL, config.ADMIN_EMAIL)
 
     return "Hi there,\n\n{}\n\nThis is an automated message; please do not reply directly " \
            "to this email. If you have any questions, bug reports, or feedback, please " \
@@ -213,10 +195,10 @@ def get_admin_email_body(main_content):
 
 @unexpected_exception_handling
 def set_email_login():
-    """Save or update the 'SENDER_EMAIL' login details using the keyring library."""
-    pw = input("Type in {} password and press Enter: ".format(SENDER_EMAIL))
+    """Save or update the 'config.SENDER_EMAIL' login details using the keyring library."""
+    pw = input("Type in {} password and press Enter: ".format(config.SENDER_EMAIL))
     # A wrapper for the Python keyring library
-    yagmail.register(SENDER_EMAIL, pw)
+    yagmail.register(config.SENDER_EMAIL, pw)
 
 
 @unexpected_exception_handling
@@ -229,7 +211,7 @@ def save_unsent_email(address, subject, body):
         body (str): the main body content of the email.
 
     """
-    unsent_dir = PATH + 'data/_unsent_emails'
+    unsent_dir = config.PATH + 'data/_unsent_emails'
     if not os.path.isdir(unsent_dir):
         os.mkdir(unsent_dir)
 
@@ -256,11 +238,11 @@ def send_emails(emails_list):
             - *attachments (str, optional): 0 or more attachment file locations.
 
     """
-    if not EMAILS_ENABLED:
+    if not config.EMAILS_ENABLED:
         return None
 
     # Provide sender email password as second argument if not saving via 'set_email_login()'
-    with yagmail.SMTP(SENDER_EMAIL) as server:
+    with yagmail.SMTP(config.SENDER_EMAIL) as server:
         print("\nSending {} email(s)...".format(len(emails_list)))
         valid_login = True
         for address, subject, body, *attachments in emails_list:
@@ -328,9 +310,9 @@ class RunChecks:
         self.no_change, self.change, self.first_run, self.error = 0, 0, 0, 0
 
         # If /data doesn't exist yet, create directory and main log file
-        if not os.path.isdir(PATH + 'data'):
-            os.mkdir(PATH + 'data')
-            f = open(MAIN_LOG, 'x')
+        if not os.path.isdir(config.PATH + 'data'):
+            os.mkdir(config.PATH + 'data')
+            f = open(config.MAIN_LOG, 'x')
             f.close()
 
     def check_all(self):
@@ -352,7 +334,7 @@ class RunChecks:
 
         email_subject = "Robots.txt Checks Complete"
         email_body = get_admin_email_body(summary)
-        admin_email.append((ADMIN_EMAIL, email_subject, email_body, MAIN_LOG))
+        admin_email.append((config.ADMIN_EMAIL, email_subject, email_body, config.MAIN_LOG))
 
     def check_site(self, site_attributes):
         """Run a robots.txt check and report for a single site.
@@ -440,9 +422,9 @@ class RobotsCheck:
         self.file_change = False
         # Use site domain name as directory name
         if self.url[:5] == 'https':
-            self.dir = PATH + "data/" + self.url[8:-1]
+            self.dir = config.PATH + "data/" + self.url[8:-1]
         else:
-            self.dir = PATH + "data/" + self.url[7:-1]
+            self.dir = config.PATH + "data/" + self.url[7:-1]
         self.old_file = self.dir + "/program_files/old_file.txt"
         self.new_file = self.dir + "/program_files/new_file.txt"
         # Content assigned during 'update_records()' after a successful check
@@ -745,7 +727,7 @@ class ErrorReport(Report):
 def main():
     """Run all checks and handle fatal errors."""
     try:
-        sites_data = sites_from_file(MONITORED_SITES)
+        sites_data = sites_from_file(config.MONITORED_SITES)
         RunChecks(sites_data).check_all()
 
     except Exception as fatal_err:
@@ -758,10 +740,10 @@ def main():
                         "caused the program to terminate unexpectedly."
 
         email_body = get_admin_email_body(email_content)
-        admin_email.append((ADMIN_EMAIL, email_subject, email_body))
+        admin_email.append((config.ADMIN_EMAIL, email_subject, email_body))
 
     finally:
-        if EMAILS_ENABLED:
+        if config.EMAILS_ENABLED:
             send_emails(admin_email)
         else:
             print("Note: emails are disabled. Details of the program run have been printed "
