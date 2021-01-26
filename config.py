@@ -9,11 +9,11 @@ MAIN_LOG = PATH + "data/main_log.txt"
 
 # The email address of the program administrator, included as a point of contact in all emails
 # This address will receive a summary report every time checks are run
-ADMIN_EMAIL = "robotstxtmonitor@gmail.com"
+ADMIN_EMAIL = "ADMIN_EMAIL@gmail.com"
 
 # A Gmail address which will send emails
 # Less secure app access must be enabled: https://support.google.com/accounts/answer/6010255
-SENDER_EMAIL = "robotstxtmonitor@gmail.com"
+SENDER_EMAIL = "SENDER_EMAIL@gmail.com"
 
 # Toggle ('True' or 'False') whether emails are enabled (both site admins and the program admin)
 EMAILS_ENABLED = True
