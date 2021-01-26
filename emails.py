@@ -24,7 +24,7 @@ def replace_angle_brackets(content):
 
 
 @logs.unexpected_exception_handling
-def get_user_email_body(main_content):
+def get_site_email_body(main_content):
     """Return the full site admin email body content, including generic and unique content.
 
     Args:

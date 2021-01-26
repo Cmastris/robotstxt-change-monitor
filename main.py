@@ -141,7 +141,7 @@ class RunChecks:
                             "shown below.\n\n{}".format(err_msg)
 
             email_content = emails.replace_angle_brackets(email_content)
-            email_body = emails.get_user_email_body(email_content)
+            email_body = emails.get_site_email_body(email_content)
             emails.site_emails.append((site_attributes[2].strip(), email_subject, email_body))
             self.error += 1
 
@@ -409,7 +409,7 @@ class ChangeReport(Report):
                         "\n\nView the live robots.txt file: {}" \
                         "".format(self.url, link)
 
-        email_body = emails.get_user_email_body(email_content)
+        email_body = emails.get_site_email_body(email_content)
         emails.site_emails.append((self.email, email_subject, email_body,
                                    self.old_file, self.new_file, diff_file))
 
@@ -449,7 +449,7 @@ class FirstRunReport(Report):
                         "\n\n-----START OF FILE-----\n\n{}\n\n-----END OF FILE-----\n\n" \
                         "".format(self.url, self.new_content)
 
-        email_body = emails.get_user_email_body(email_content)
+        email_body = emails.get_site_email_body(email_content)
         emails.site_emails.append((self.email, email_subject, email_body))
 
 
@@ -479,7 +479,7 @@ class ErrorReport(Report):
                         "".format(self.url, self.err_message)
 
         email_content = emails.replace_angle_brackets(email_content)
-        email_body = emails.get_user_email_body(email_content)
+        email_body = emails.get_site_email_body(email_content)
         emails.site_emails.append((self.email, email_subject, email_body))
 
 
