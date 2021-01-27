@@ -20,6 +20,12 @@ Whether you're a webmaster or SEO, this simple tool can help you quickly discove
 
 
 ## Setup
+
+### Requirements
+- [Python 3](https://www.python.org/downloads/)
+- [Requests](https://pypi.org/project/requests/)
+- [Yagmail](https://pypi.org/project/yagmail/)
+
 ### Emails disabled, local
 *The quickest setup, suitable if you plan to run the tool on your local machine for sites that you're personally monitoring.*
 1. Save the project (or just the .py files) to a new directory.
@@ -41,7 +47,7 @@ https://github.com/ | Github | example@gmail.com
 1. Save the project (or just the .py files) to a new directory.
 2. Add the required details to `config.py`:
 - Set `ADMIN_EMAIL` to equal an email address which will receive the summary report.
-- Set `SENDER_EMAIL` to equal a Gmail address which will send all emails. [Less secure app access](https://support.google.com/accounts/answer/6010255) must be enabled. For this reason and the (small) risk of emails being flagged as spam, it is strongly recommended that you set up a new Google account for this. 
+- Set `SENDER_EMAIL` to equal a Gmail address which will send all emails. [Less secure app access](https://support.google.com/accounts/answer/6010255) must be enabled. It's strongly recommended that you set up a new Google account for this. 
 - Ensure `EMAILS_ENABLED = True`.
 3. Create a CSV file named "monitored_sites.csv" in the same directory as the .py files.
 4. Add a header row (with column labels) and details of sites you want to monitor, as defined below:
@@ -61,7 +67,7 @@ if __name__ == "__main__":
     main()
 ```
 
-6. Run `main.py`. The results will be printed and data/logs saved in a newly created /data subdirectory. You will be prompted to enter your `SENDER_EMAIL` password, which will be saved for future use using [Keyring](https://pypi.org/project/keyring/).
+6. Run `main.py`. The results will be printed and data/logs saved in a newly created /data subdirectory. You will be prompted to enter your `SENDER_EMAIL` password, which will be saved for future use via [Keyring](https://pypi.org/project/keyring/).
    
 7. Re-comment `set_email_login()` and save the file:
 ```
