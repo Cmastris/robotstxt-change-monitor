@@ -3,6 +3,12 @@
 An accidental "Disallow: /" can happen to anyone, but it doesn't need to linger unnoticed.
 Whether you're a webmaster or SEO, this simple tool can help you quickly discover unwelcome robots.txt changes.
 
+## Contents
+- **[Key features](#key-features)**
+- **[How it works](#how-it-works)**
+- **[Setup](#setup)**
+- **[FAQs](#faqs)**
+
 ## Key features
 - **Easily check results.** Robots.txt check results are printed to the console and logged.
 - **Snapshots and diffs.** The robots.txt content is saved following the first check and whenever the file changes. A diff file saved after every change helps you understand the modifications at a glance. 
@@ -98,7 +104,7 @@ Refer to "Emails enabled, local", with the following considerations:
 ## FAQs
 
 ### How can I ask questions, report bugs, or provide feedback?
-Feel free to [create an issue](https://docs.github.com/en/github/managing-your-work-on-github/about-issues) if you have any questions, bug reports, or feedback.
+Feel free to create an issue or open a new discussion.
 
 ### What should I do if there's a connection error or non-200 status code?
 If the tool repeatedly reports a connection error or non-200 status code for a site, but it seems fine when you access the file: 
