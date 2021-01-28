@@ -96,5 +96,15 @@ Refer to "Emails enabled, local", with the following considerations:
 
 
 ## FAQs
-TODO
-Questions/contact, activate development, and contributions
+
+### How can I ask questions, report bugs, or provide feedback?
+Feel free to [create an issue](https://docs.github.com/en/github/managing-your-work-on-github/about-issues) if you have any questions, bug reports, or feedback.
+
+### What should I do if there's a connection error or non-200 status code?
+If the tool repeatedly reports a connection error or non-200 status code for a site, but it seems fine when you access the file: 
+- Check that the monitored URL is in the correct format
+- Request that your IP address (or your server's IP address) is whitelisted
+- Troubleshoot with your IT/development teams
+
+### Is this project in active development?
+There are no further updates/features planned, and I'm not looking for contributions, but I'll be happy to fix any (significant) bugs.
