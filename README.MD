@@ -67,21 +67,21 @@ URL | Name | Email
 ----|------|-----
 https://github.com/ | Github | example@gmail.com
 
-5. Open `main.py`, uncomment `set_email_login()`, and save the file:
+5. Open `main.py`, uncomment `emails.set_email_login()`, and save the file:
 ```
 if __name__ == "__main__":
     # Use set_email_login() to save login details on first run or if email/password changes:
-    set_email_login()
+    emails.set_email_login()
     main()
 ```
 
 6. Run `main.py`. The results will be printed and data/logs saved in a newly created /data subdirectory. You will be prompted to enter your `SENDER_EMAIL` password, which will be saved for future use via [Keyring](https://pypi.org/project/keyring/).
    
-7. Re-comment `set_email_login()` and save the file:
+7. Re-comment `emails.set_email_login()` and save the file:
 ```
 if __name__ == "__main__":
     # Use set_email_login() to save login details on first run or if email/password changes:
-    # set_email_login()
+    # emails.set_email_login()
     main()
 ```
 
@@ -94,7 +94,7 @@ Refer to "Emails enabled, local", with the following considerations:
 - If [Keyring](https://pypi.org/project/keyring/) isn't compatible with your server: 
     - Open `emails.py`and locate the following line within `send_emails()`: `with yagmail.SMTP(config.SENDER_EMAIL) as server:`
     - Edit this line to include the sender email password as the second argument of `yagmail.SMTP`: `with yagmail.SMTP(config.SENDER_EMAIL, SENDER_EMAIL_PASSWORD) as server:`
-    - Open `main.py` and ensure `set_email_login()` is commented out.
+    - Open `main.py` and ensure `emails.set_email_login()` is commented out.
     
 - You may need to edit the shebang line at the top of `main.py`.
 - You may need to edit the `PATH` variable in `config.py`.

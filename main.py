@@ -513,5 +513,5 @@ def main():
 
 if __name__ == "__main__":
     # Use set_email_login() to save login details on first run or if email/password changes:
-    # set_email_login()
+    # emails.set_email_login()
     main()
