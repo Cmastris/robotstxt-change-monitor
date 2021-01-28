@@ -40,7 +40,9 @@ URL | Name | Email
 ----|------|-----
 https://github.com/ | Github | example@gmail.com
 
-5. Run `main.py`. The results will be printed and data/logs saved in a newly created /data subdirectory. Run `main.py` again whenever you want to re-check the robots.txt files.
+5. Run `main.py`. The results will be printed and data/logs saved in a newly created /data subdirectory. 
+   
+6. Run `main.py` again whenever you want to re-check the robots.txt files. It's recommended that you check the print output or main log after every run, or at least after new sites are added, in case of unexpected errors.
 
 ### Emails enabled, local
 *Slightly more setup, suitable if you plan to run the tool on your local machine for yourself and others.*
@@ -77,7 +79,7 @@ if __name__ == "__main__":
     main()
 ```
 
-8. Run `main.py` again whenever you want to re-check the robots.txt files.
+8. Run `main.py` again whenever you want to re-check the robots.txt files. It's recommended that you check the main log after every run, or at least after new sites are added, in case of unexpected errors.
 
 ### Emails enabled, server cron job (recommended)
 *More setup for a fully automated experience.*
@@ -90,11 +92,8 @@ Refer to "Emails enabled, local", with the following considerations:
     
 - You may need to edit the shebang line at the top of `main.py`.
 - You may need to edit the `PATH` variable in `config.py`.
-- I'd strongly recommend testing the cron job implementation is working correctly. To test that changes are being correctly detected/reported, you can edit `new_file.txt` within the `program_files` subdirectory of a monitored site directory. On the following run, a change (versus the edited, "old" file) should be reported.
+- It's strongly recommended that you test the cron job implementation is working correctly. To test that changes are being correctly detected/reported, you can edit `new_file.txt` within the `program_files` subdirectory of a monitored site directory. On the following run, a change (versus the edited, "old" file) should be reported.
 
-
-## Maintenance
-TODO
 
 ## FAQs
 TODO
