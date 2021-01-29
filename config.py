@@ -17,3 +17,6 @@ SENDER_EMAIL = "SENDER_EMAIL@gmail.com"
 
 # Toggle ('True' or 'False') whether emails are enabled (both site admins and the program admin)
 EMAILS_ENABLED = True
+
+# User-agent string sent in request headers
+USER_AGENT = "Robots.txtMonitor/1.0"

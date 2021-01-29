@@ -248,7 +248,8 @@ class RobotsCheck:
                            "Attempt {} of {}.".format(wait, attempt + 1, max_attempts)
 
             try:
-                req = requests.get(robots_url, allow_redirects=False, timeout=40)
+                headers = {'User-Agent': config.USER_AGENT}
+                req = requests.get(robots_url, headers=headers, allow_redirects=False, timeout=40)
 
             except requests.exceptions.Timeout as e:
                 err = "{} timed out before sending a valid response.".format(robots_url)

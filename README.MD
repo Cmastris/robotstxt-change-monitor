@@ -107,9 +107,10 @@ Refer to "Emails enabled, local", with the following considerations:
 Feel free to create an issue or open a new discussion.
 
 ### What should I do if there's a connection error or non-200 status code?
-If the tool repeatedly reports a connection error or non-200 status code for a site, but it seems fine when you access the file: 
+If the tool repeatedly reports a connection error or non-200 status code for a site, but you're able to access the file via your browser: 
 - Check that the monitored URL is in the correct format
 - Request that your IP address (or your server's IP address) is whitelisted
+- Try adjusting the `USER_AGENT` string (e.g. to spoof a common browser) in `config.py`
 - Troubleshoot with your IT/development teams
 
 ### Is this project in active development?
