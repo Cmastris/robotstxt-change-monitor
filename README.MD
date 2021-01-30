@@ -1,7 +1,7 @@
 # Robots.txt Monitor
 ### Never miss a robots.txt change again.
 An accidental "Disallow: /" can happen to anyone, but it doesn't need to linger unnoticed.
-Whether you're a webmaster or SEO, this simple tool can help you quickly discover unwelcome robots.txt changes.
+Whether you're a webmaster, developer, or SEO, this tool can help you quickly discover unwelcome robots.txt changes.
 
 ## Contents
 - **[Key features](#key-features)**
@@ -10,11 +10,12 @@ Whether you're a webmaster or SEO, this simple tool can help you quickly discove
 - **[FAQs](#faqs)**
 
 ## Key features
-- **Easily check results.** Robots.txt check results are printed to the console and logged.
-- **Snapshots and diffs.** The robots.txt content is saved following the first check and whenever the file changes. A diff file saved after every change helps you understand the modifications at a glance. 
-- **Email alerts (optional).** Want to run the monitor on a server and/or notify others about changes? No problem. Includes site-specific alerts and a summary for the tool administrator after every run. 
-- **Designed for reliability.** Errors such as a mistyped URL or connection issue are handled gracefully and won't break other robots.txt checks.
-- **Comprehensive logging.** The results of checks and any errors are all recorded in a main log and website log (where relevant), so you can check historic data and investigate if anything does go wrong.
+- **Easily check results.** Robots.txt check results are printed, logged, and optionally emailed (see below).
+- **Snapshots.** The robots.txt content is saved following the first check and whenever the file changes. 
+- **Diffs.** A diff file is created after every change to help you view the difference at a glance. 
+- **Email alerts (optional).** Automatically notify site watchers about changes and send a summary email to the tool admin after every run. No need to run and check everything manually.
+- **Designed for reliability.** Errors such as a mistyped URL or connection issue are handled gracefully and won't break other robots.txt checks. Unexpected issues are caught and logged.
+- **Comprehensive logging.** Check results and any errors are recorded in a main log and website log (where relevant), so you can refer back to historic data and investigate if anything goes wrong.
 
 ## How it works
 1. A /data directory is created/accessed to store robots.txt file data and logs.
@@ -27,7 +28,7 @@ Whether you're a webmaster or SEO, this simple tool can help you quickly discove
 
 ## Setup
 
-### Requirements
+### Prerequisites
 - [Python 3](https://www.python.org/downloads/)
 - [Requests](https://pypi.org/project/requests/)
 - [Yagmail](https://pypi.org/project/yagmail/)
