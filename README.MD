@@ -107,12 +107,14 @@ Refer to "Emails enabled, local", with the following considerations:
 ### How can I ask questions, report bugs, or provide feedback?
 Feel free to create an issue or open a new discussion.
 
-### What should I do if there's a connection error or non-200 status code?
-If the tool repeatedly reports a connection error or non-200 status code for a site, but you're able to access the file via your browser: 
-- Check that the monitored URL is in the correct format
-- Request that your IP address (or your server's IP address) is whitelisted
-- Try adjusting the `USER_AGENT` string (e.g. to spoof a common browser) in `config.py`
-- Troubleshoot with your IT/development teams
+### What should I do if there's a connection error, non-200 status, or inaccurate content?
+If the tool repeatedly reports an error or inaccurate robots.txt content for a site, but you're able to view the file via your browser, this is likely due to an invalid URL format or the tool being blocked in some way. 
+
+Try the following: 
+1. Check that the monitored URL is in the correct format.
+2. Request that your IP address (or your server's IP address) is whitelisted.
+3. Try adjusting the `USER_AGENT` string (e.g. to spoof a common browser) in `config.py`.
+4. Troubleshoot with your IT/development teams.
 
 ### Is this project in active development?
 There are no further updates/features planned, and I'm not looking for contributions, but I'll be happy to fix any (significant) bugs.
