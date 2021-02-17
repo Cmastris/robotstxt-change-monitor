@@ -309,7 +309,8 @@ class RobotsCheck:
             self.first_run = True
 
         # Overwrite the contents of new_file with new_extraction
-        with open(self.new_file, 'w') as new:
+        # Characters which can't be encoded are replaced with an escape sequence
+        with open(self.new_file, 'w', errors='backslashreplace') as new:
             new.write(new_extraction)
 
         # Read content from both files to avoid reading-related comparison inconsistencies
