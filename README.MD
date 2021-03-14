@@ -33,6 +33,8 @@ Whether you're a webmaster, developer, or SEO, this tool can help you quickly di
 - [Requests](https://pypi.org/project/requests/)
 - [Yagmail](https://pypi.org/project/yagmail/)
 
+For version requirements, refer to [requirements.txt](/requirements.txt).
+
 ### Emails disabled, local
 *The quickest setup, suitable if you plan to run the tool on your local machine for sites that you're personally monitoring.*
 1. Save the project (or just the .py files) to a new directory.
