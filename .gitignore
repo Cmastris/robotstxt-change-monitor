@@ -1,5 +1,11 @@
-# Ignore robots.txt record files and log files
+# Robots.txt record files and log files
 /data
 
-# Ignore data input file(s)
+# Data input file
 *.csv
+
+# IDE settings
+/.idea
+
+# Miscellaneous
+__pycache__/
