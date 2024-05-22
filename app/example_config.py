@@ -1,5 +1,5 @@
-# Directories/files are relative to script location by default; change if necessary
-PATH = ""
+# The absolute path of the project root directory
+PATH = r'C:\Users\ExampleUser\python\robotstxt_checker' + '\\'
 
 # The file location of the monitored sites CSV (see 'sites_from_file()' documentation for details)
 MONITORED_SITES = PATH + "monitored_sites.csv"
