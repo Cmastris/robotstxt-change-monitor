@@ -30,7 +30,7 @@ Whether you're a webmaster, developer, or SEO, this tool can help you quickly di
 
 ### Environment
 1. Save the project to a new directory (locally or on a server).
-2. Locate the `example_config.py` file in the top-level directory and create a new `config.py` file in the same directory. Copy in the contents of `example_config.py` (this will be filled in properly later).
+2. Locate the `example_config.py` file in the `/app/` directory and create a new `config.py` file in the same directory. Copy in the contents of `example_config.py` (this will be filled in properly later).
 3. Install all requirements using the [Pipfile](/Pipfile). For more information, please refer to the [Pipenv documentation](https://pipenv.pypa.io/en/latest/).
 
 
