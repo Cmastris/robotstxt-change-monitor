@@ -4,6 +4,9 @@
 # Data input file
 *.csv
 
+# Config file
+config.py
+
 # IDE settings
 /.idea
 
