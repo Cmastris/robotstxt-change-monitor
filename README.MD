@@ -28,19 +28,17 @@ Whether you're a webmaster, developer, or SEO, this tool can help you quickly di
 
 ## Setup
 
-### Prerequisites
-- [Python 3](https://www.python.org/downloads/)
-- [Requests](https://pypi.org/project/requests/)
-- [Yagmail](https://pypi.org/project/yagmail/)
+### Environment
+Firstly, save the project to a new directory (locally or on a server).
 
-For version requirements, refer to [requirements.txt](/requirements.txt).
+Secondly, install all requirements using the [Pipfile](/Pipfile). For more information, please refer to the [Pipenv documentation](https://pipenv.pypa.io/en/latest/).
+
 
 ### Emails disabled, local
 *The quickest setup, suitable if you plan to run the tool on your local machine for sites that you're personally monitoring.*
-1. Save the project (or just the .py files) to a new directory.
-2. Open `config.py` and set `EMAILS_ENABLED = False`.
-3. Create a CSV file named "monitored_sites.csv" in the same directory as the .py files.
-4. Add a header row (with column labels) and details of sites you want to monitor, as defined below:
+1. Open `config.py` and set `EMAILS_ENABLED = False`.
+2. Create a CSV file named "monitored_sites.csv" in the same directory as the .py files.
+3. Add a header row (with column labels) and details of sites you want to monitor, as defined below:
 - URL (column 1): the absolute URL of the website homepage, with a trailing slash.
 - Name (column 2): the website's name identifier (letters/numbers only).
 - Email (column 3): the email address of the site admin, who will receive alerts.
@@ -49,19 +47,18 @@ URL | Name | Email
 ----|------|-----
 https://github.com/ | Github | example@gmail.com
 
-5. Run `main.py`. The results will be printed and data/logs saved in a newly created /data subdirectory. 
+4. Run `main.py`. The results will be printed and data/logs saved in a newly created /data subdirectory. 
    
-6. Run `main.py` again whenever you want to re-check the robots.txt files. It's recommended that you check the print output or main log after every run, or at least after new sites are added, in case of unexpected errors.
+5. Run `main.py` again whenever you want to re-check the robots.txt files. It's recommended that you check the print output or main log after every run, or at least after new sites are added, in case of unexpected errors.
 
 ### Emails enabled, local
 *Slightly more setup, suitable if you plan to run the tool on your local machine for yourself and others.*
-1. Save the project (or just the .py files) to a new directory.
-2. Add the required details to `config.py`:
+1. Add the required details to `config.py`:
 - Set `ADMIN_EMAIL` to equal an email address which will receive the summary report.
 - Set `SENDER_EMAIL` to equal a Gmail address which will send all emails. [Less secure app access](https://support.google.com/accounts/answer/6010255) must be enabled. It's strongly recommended that you set up a new Google account for this. 
 - Ensure `EMAILS_ENABLED = True`.
-3. Create a CSV file named "monitored_sites.csv" in the same directory as the .py files.
-4. Add a header row (with column labels) and details of sites you want to monitor, as defined below:
+2. Create a CSV file named "monitored_sites.csv" in the same directory as the .py files.
+3. Add a header row (with column labels) and details of sites you want to monitor, as defined below:
 - URL (column 1): the absolute URL of the website homepage, with a trailing slash.
 - Name (column 2): the website's name identifier (letters/numbers only).
 - Email (column 3): the email address of the site admin, who will receive alerts.
@@ -70,7 +67,7 @@ URL | Name | Email
 ----|------|-----
 https://github.com/ | Github | example@gmail.com
 
-5. Open `main.py`, uncomment `emails.set_email_login()`, and save the file:
+4. Open `main.py`, uncomment `emails.set_email_login()`, and save the file:
 ```
 if __name__ == "__main__":
     # Use set_email_login() to save login details on first run or if email/password changes:
@@ -78,9 +75,9 @@ if __name__ == "__main__":
     main()
 ```
 
-6. Run `main.py`. The results will be printed and data/logs saved in a newly created /data subdirectory. You will be prompted to enter your `SENDER_EMAIL` password, which will be saved for future use via [Keyring](https://pypi.org/project/keyring/).
+5. Run `main.py`. The results will be printed and data/logs saved in a newly created /data subdirectory. You will be prompted to enter your `SENDER_EMAIL` password, which will be saved for future use via [Keyring](https://pypi.org/project/keyring/).
    
-7. Re-comment `emails.set_email_login()` and save the file:
+6. Re-comment `emails.set_email_login()` and save the file:
 ```
 if __name__ == "__main__":
     # Use set_email_login() to save login details on first run or if email/password changes:
@@ -88,7 +85,7 @@ if __name__ == "__main__":
     main()
 ```
 
-8. Run `main.py` again whenever you want to re-check the robots.txt files. It's recommended that you check the main log after every run, or at least after new sites are added, in case of unexpected errors.
+7. Run `main.py` again whenever you want to re-check the robots.txt files. It's recommended that you check the main log after every run, or at least after new sites are added, in case of unexpected errors.
 
 ### Emails enabled, server cron job (recommended)
 *More setup for a fully automated experience.*
