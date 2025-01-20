@@ -1,8 +1,5 @@
 import os
-import smtplib
 import time
-
-import yagmail
 
 import config
 import logs
@@ -57,14 +54,6 @@ def get_admin_email_body(main_content):
 
 
 @logs.unexpected_exception_handling
-def set_email_login():
-    """Save or update the 'config.SENDER_EMAIL' login details using the keyring library."""
-    pw = input("Type in {} password and press Enter: ".format(config.SENDER_EMAIL))
-    # A wrapper for the Python keyring library
-    yagmail.register(config.SENDER_EMAIL, pw)
-
-
-@logs.unexpected_exception_handling
 def save_unsent_email(address, subject, body):
     """Save the key details of an email which couldn't be sent to a timestamped .txt file.
 
@@ -92,6 +81,7 @@ def save_unsent_email(address, subject, body):
 @logs.unexpected_exception_handling
 def send_emails(emails_list):
     """Send emails based on a list of tuples in the form (address, subject, body, *attachments).
+    Requires the population of email sending functionality depending on specific requirements.
 
     Args:
         emails_list (list): A list of tuples, with each tuple containing the following data:
@@ -104,45 +94,24 @@ def send_emails(emails_list):
     if not config.EMAILS_ENABLED:
         return None
 
-    # Provide sender email password as second argument if not saving via 'set_email_login()'
-    with yagmail.SMTP(config.SENDER_EMAIL) as server:
-        print("\nSending {} email(s)...".format(len(emails_list)))
-        valid_login = True
-        for address, subject, body, *attachments in emails_list:
-            # Re-attempt send if login failed and password updated via 'set_email_login()'
-            while valid_login:
-                try:
-                    server.send(to=address, subject=subject, contents=body, attachments=attachments)
-                    print("Email sent to {} (subject: {}).".format(address, subject))
-                    time.sleep(0.5)
-                    # Break out of 'while valid_login' loop to move to next email
-                    break
+    print("Emails are enabled in `config.py`.")
+    print("However, email sending functionality needs to be implemented in "
+          "the emails.py `send_emails()` function.")
 
-                except smtplib.SMTPAuthenticationError as e:
-                    short_err_msg = "Email login failed. Please ensure that less secure app " \
-                                    "access is 'On' for the sender email Google account and " \
-                                    "that your saved login details are correct."
+    # Uncomment the following line when email sending functionality is implemented
+    # print("\nSending {} email(s)...".format(len(emails_list)))
 
-                    print(short_err_msg)
-                    # Provide option of updating password and re-attempting send
-                    answer = input("Type 'y' and press Enter to update your saved password "
-                                   "and re-attempt the login: ")
+    # Populate your email sending functionality and specific error handling here
+    # Log any errors using `logs.get_err_str()` and `logs.log_error()` and/or raise them
+    # to be caught by the generic exception handling below
+    # The following guide may be helpful: https://realpython.com/python-send-email/
 
-                    if answer.lower().strip() == 'y':
-                        set_email_login()
+    for address, subject, body, *attachments in emails_list:
+        try:
+            pass
 
-                    else:
-                        err_msg = logs.get_err_str(e, short_err_msg + "These can be updated using "
-                                                   "set_email_login().", trace=False)
-
-                        logs.log_error(err_msg)
-                        # Skip send attempts for any subsequent emails
-                        valid_login = False
-
-                # Prevent all emails failing; log error and save unsent email
-                except Exception as e:
-                    err_msg = logs.get_err_str(e, "Error sending email to {}.".format(address))
-                    logs.log_error(err_msg)
-                    save_unsent_email(address, subject, body)
-                    # Break out of while loop to move to next email
-                    break
+        # Prevent all emails failing; log error and save unsent email
+        except Exception as e:
+            err_msg = logs.get_err_str(e, "Error sending email to {}.".format(address))
+            logs.log_error(err_msg)
+            save_unsent_email(address, subject, body)

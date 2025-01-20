@@ -4,7 +4,7 @@ import traceback
 
 import config
 
-# Errors which will be sent to 'config.ADMIN_EMAIL' to be investigated
+# Errors that will be emailed (if configured) to 'ADMIN_EMAIL' in config.py
 admin_email_errors = []
 
 

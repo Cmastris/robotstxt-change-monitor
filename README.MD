@@ -1,24 +1,36 @@
-# Robots.txt Monitor
-### Never miss a robots.txt change again.
-An accidental "Disallow: /" can happen to anyone, but it doesn't need to linger unnoticed.
+# Robots.txt Monitor <!-- omit in toc -->
+
+### Never miss a robots.txt change again. <!-- omit in toc -->
+An accidental "Disallow: /" can happen to anyone, but it doesn't need to remain unnoticed.
 Whether you're a webmaster, developer, or SEO, this tool can help you quickly discover unwelcome robots.txt changes.
 
-## Contents
-- **[Key features](#key-features)**
-- **[How it works](#how-it-works)**
-- **[Setup](#setup)**
-- **[FAQs](#faqs)**
+## Contents <!-- omit in toc -->
+
+- [Key features](#key-features)
+- [How it works](#how-it-works)
+- [Setup](#setup)
+  - [General setup (all setup options)](#general-setup-all-setup-options)
+  - [Setup options](#setup-options)
+    - [Local with emails disabled](#local-with-emails-disabled)
+    - [Local with emails enabled](#local-with-emails-enabled)
+    - [Server with emails enabled](#server-with-emails-enabled)
+  - [Testing](#testing)
+- [FAQs](#faqs)
+  - [How can I ask questions, report bugs, or provide feedback?](#how-can-i-ask-questions-report-bugs-or-provide-feedback)
+  - [What should I do if there's a connection error, non-200 status, or inaccurate content?](#what-should-i-do-if-theres-a-connection-error-non-200-status-or-inaccurate-content)
+  - [Is this project in active development?](#is-this-project-in-active-development)
+
 
 ## Key features
-- **Easily check results.** Robots.txt check results are printed, logged, and optionally emailed (see below).
+- **Easily check results.** Robots.txt check results are printed to the screen, logged in files, and optionally emailed (refer to the [setup instructions](#setup)).
 - **Snapshots.** The robots.txt content is saved following the first check and whenever the file changes. 
 - **Diffs.** A diff file is created after every change to help you view the difference at a glance. 
-- **Email alerts (optional).** Automatically notify site watchers about changes and send a summary email to the tool admin after every run. No need to run and check everything manually.
-- **Designed for reliability.** Errors such as a mistyped URL or connection issue are handled gracefully and won't break other robots.txt checks. Unexpected issues are caught and logged.
 - **Comprehensive logging.** Check results and any errors are recorded in a main log and website log (where relevant), so you can refer back to historic data and investigate if anything goes wrong.
+- **Designed for reliability.** Errors such as a mistyped URL or connection issue are handled gracefully and won't break other robots.txt checks. Unexpected issues are caught and logged.
+
 
 ## How it works
-1. A /data directory is created/accessed to store robots.txt file data and logs.
+1. A /data/ directory is created/accessed to store robots.txt file data and logs.
 2. All monitored robots.txt files are downloaded and compared against the previous version.
 3. The check result is logged/printed and categorised as either "first run", "no change", "change", or "error".
 4. Timestamped snapshots ("first run" and "change") and diffs ("change") are saved in the relevant site directory.
@@ -28,77 +40,52 @@ Whether you're a webmaster, developer, or SEO, this tool can help you quickly di
 
 ## Setup
 
-### Environment
-1. Save the project to a new directory (locally or on a server).
-2. Locate the `example_config.py` file in the `/app/` directory and create a new `config.py` file in the same directory. Copy in the contents of `example_config.py` (this will be filled in properly later).
-3. Install all requirements using the [Pipfile](/Pipfile). For more information, please refer to the [Pipenv documentation](https://pipenv.pypa.io/en/latest/).
-
-
-### Emails disabled, local
-*The quickest setup, suitable if you plan to run the tool on your local machine for sites that you're personally monitoring.*
-1. Open `config.py` and set `EMAILS_ENABLED = False`.
-2. Create a CSV file named "monitored_sites.csv" in the same directory as the .py files.
-3. Add a header row (with column labels) and details of sites you want to monitor, as defined below:
+### General setup (all setup options)
+1. [Clone a local copy of this repository](https://docs.github.com/en/repositories/creating-and-managing-repositories/cloning-a-repository) to your computer and/or a server, depending on your chosen setup (detailed below).
+2. Create a new `config.py` file in the /app/ subdirectory. Copy the contents of `example_config.py` into `config.py`. Edit the `PATH` variable to reference the location of the project root directory.
+3. Install all requirements (specific versions of Python and packages) using the [Pipfile](/Pipfile). For more information, please read the [Pipenv documentation](https://pipenv.pypa.io/en/latest/).
+4. Create a "monitored_sites.csv" file in the top-level directory (which contains the README file). Populate the file with a header row (column labels) and details of the website(s) you want to monitor, as defined below:
 - URL (column 1): the absolute URL of the website homepage, with a trailing slash.
 - Name (column 2): the website's name identifier (letters/numbers only).
-- Email (column 3): the email address of the site admin, who will receive alerts.
+- Email (column 3): the email address of the website monitor, i.e. the person who will receive email notifications of errors/changes (if enabled). Note: an email header row label is required but email addresses don't need to be populated unless emails are enabled (detailed below).
 
 URL | Name | Email
 ----|------|-----
-https://github.com/ | Github | example@gmail.com
+https://github.com/ | Github | person@example.com
+https://www.example.com/ | Example | another.person@example.com
 
-4. Run `main.py`. The results will be printed and data/logs saved in a newly created /data subdirectory. 
+### Setup options
+
+#### Local with emails disabled
+*The quickest setup, suitable if you plan to run the tool on your computer for sites that you're personally monitoring (or are otherwise willing to notify other people about changes/errors manually).*
+
+1. Run `main.py` (in the /app/ subdirectory). The results should be printed to the console and the data/logs should be saved in a newly created /data/ directory.
    
-5. Run `main.py` again whenever you want to re-check the robots.txt files. It's recommended that you check the print output or main log after every run, or at least after new sites are added, in case of unexpected errors.
+2. Run `main.py` again whenever you want to re-check the robots.txt files. It's recommended that you check the print output or main log regularly, or at least after new sites are added, in case there are any unexpected errors.
 
-### Emails enabled, local
-*Slightly more setup, suitable if you plan to run the tool on your local machine for yourself and others.*
-1. Add the required details to `config.py`:
-- Set `ADMIN_EMAIL` to equal an email address which will receive the summary report.
-- Set `SENDER_EMAIL` to equal a Gmail address which will send all emails. [Less secure app access](https://support.google.com/accounts/answer/6010255) must be enabled. It's strongly recommended that you set up a new Google account for this. 
-- Ensure `EMAILS_ENABLED = True`.
-2. Create a CSV file named "monitored_sites.csv" in the same directory as the .py files.
-3. Add a header row (with column labels) and details of sites you want to monitor, as defined below:
-- URL (column 1): the absolute URL of the website homepage, with a trailing slash.
-- Name (column 2): the website's name identifier (letters/numbers only).
-- Email (column 3): the email address of the site admin, who will receive alerts.
+#### Local with emails enabled
+*More setup, suitable if you plan to run the tool on your computer for yourself and others.*
 
-URL | Name | Email
-----|------|-----
-https://github.com/ | Github | example@gmail.com
+1. Edit `config.py` (in the /app/ subdirectory):
+- Set `ADMIN_EMAIL` to equal an email address that will receive the summary report.
+- Set `SENDER_EMAIL` to equal an address that will send all emails (unless this isn't required in your email sending functionality, e.g. if using a third-party email service).
+- Set `EMAILS_ENABLED` to equal `True`.
 
-4. Open `main.py`, uncomment `emails.set_email_login()`, and save the file:
-```
-if __name__ == "__main__":
-    # Use set_email_login() to save login details on first run or if email/password changes:
-    emails.set_email_login()
-    main()
-```
+2. Implement email sending functionality in `emails.py` (in the /app/ subdirectory) within the `send_emails()` function stub. The function stub receives all pre-created email content (as defined in the function docstring) and includes generic exception (uncaught error) handling, but it will be up to you to implement the sending of emails using your chosen package/library/email service.
 
-5. Run `main.py`. The results will be printed and data/logs saved in a newly created /data subdirectory. You will be prompted to enter your `SENDER_EMAIL` password, which will be saved for future use via [Keyring](https://pypi.org/project/keyring/).
-   
-6. Re-comment `emails.set_email_login()` and save the file:
-```
-if __name__ == "__main__":
-    # Use set_email_login() to save login details on first run or if email/password changes:
-    # emails.set_email_login()
-    main()
-```
+3. Run `main.py`. The results should be printed to the console and the data/logs should be saved in a newly created /data/ directory. Check that emails are being sent/received as intended.
 
-7. Run `main.py` again whenever you want to re-check the robots.txt files. It's recommended that you check the main log after every run, or at least after new sites are added, in case of unexpected errors.
+4. Run `main.py` again whenever you want to re-check the robots.txt files. It's recommended that you check the print output or main log regularly, or at least after new sites are added, in case there are any unexpected errors.
 
-### Emails enabled, server cron job (recommended)
-*More setup for a fully automated experience.*
+#### Server with emails enabled
+*The most setup for a fully automated experience.*
 
-Refer to "Emails enabled, local", with the following considerations:
-- If [Keyring](https://pypi.org/project/keyring/) isn't compatible with your server: 
-    - Open `emails.py`and locate the following line within `send_emails()`: `with yagmail.SMTP(config.SENDER_EMAIL) as server:`
-    - Edit this line to include the sender email password as the second argument of `yagmail.SMTP`: `with yagmail.SMTP(config.SENDER_EMAIL, SENDER_EMAIL_PASSWORD) as server:`
-    - Open `main.py` and ensure `emails.set_email_login()` is commented out.
-    
+Refer to ["Local with emails enabled"](#local-with-emails-enabled), with the following considerations:
+- You may need to refer to your server's documentation for details of setting up a cron job to regularly run `main.py`.
 - You may need to edit the shebang line at the top of `main.py`.
-- You may need to edit the `PATH` variable in `config.py`.
-- It's strongly recommended that you test the cron job implementation is working correctly. To test that changes are being correctly detected/reported, you can edit `new_file.txt` within the `program_files` subdirectory of a monitored site directory. On the following run, a change (versus the edited, "old" file) should be reported.
+
+### Testing
+In general, errors will be reported/logged if anything is clearly breaking. However, it's a good idea to review the saved website(s) data (in the /data/ directory) after running the tool for the first and second time, to check that everything is looking correct.
 
 
 ## FAQs
@@ -116,4 +103,6 @@ Try the following:
 4. Troubleshoot with your IT/development teams.
 
 ### Is this project in active development?
-There are no further updates/features planned, and I'm not looking for contributions, but I'll be happy to fix any (significant) bugs.
+There are no major updates/features planned and I'm not looking for any substantial contributions (but you're welcome to fork your own version).
+
+However, I plan to maintain the project by periodically upgrading to newer (actively supported) versions of Python/Requests and fixing any significant bugs.

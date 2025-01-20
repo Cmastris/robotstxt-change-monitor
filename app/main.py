@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
-""" Monitor changes across one or more robots.txt files."""
+""" Monitor changes across one or more robots.txt files.
+https://github.com/Cmastris/robotstxt-change-monitor
+"""
 
 import csv
 import difflib
@@ -21,7 +23,9 @@ def sites_from_file(file):
             - Header row labelling the three columns, as listed below.
             - url (col1): the absolute URL of the website homepage, with a trailing slash.
             - name (col2): the website's name identifier (letters/numbers only).
-            - email (col3): the email address of the site admin, who will receive alerts.
+            - email (col3): the email address of the site admin if emails are enabled.
+                            Note: an email header row label is required but email addresses
+                            don't need to be populated if emails are disabled.
 
     """
     data = []
@@ -54,7 +58,8 @@ class RunChecks:
         attributes in the form [url, name, email]. Each attribute is detailed below.
             - url (str): the absolute URL of the website homepage, with a trailing slash.
             - name (str): the website's name identifier (letters/numbers only).
-            - email (str): the email address of the site admin, who will receive alerts.
+            - email (str): the email address of the site admin if emails are enabled,
+                           otherwise an empty string.
 
         no_change (int): a count of site checks with no robots.txt change.
         change (int): a count of site checks with a robots.txt change.
@@ -507,13 +512,10 @@ def main():
         if config.EMAILS_ENABLED:
             emails.send_emails(emails.admin_email)
         else:
-            print("Note: emails are disabled. Details of the program run have been printed "
-                  "and/or logged. Set 'EMAILS_ENABLED' to equal 'True' to send/receive emails.")
+            print("Note: the sending of emails is disabled in config.py.")
 
         logs.update_main_log("\n{}END OF RUN{}\n".format("-"*20, "-"*20), timestamp=False)
 
 
 if __name__ == "__main__":
-    # Use set_email_login() to save login details on first run or if email/password changes:
-    # emails.set_email_login()
     main()

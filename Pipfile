@@ -5,8 +5,6 @@ name = "pypi"
 
 [packages]
 requests = "~=2.32"
-yagmail = "~=0.14"
-keyring = "~=25.2"
 
 [dev-packages]
 
