@@ -43,7 +43,7 @@ Whether you're a webmaster, developer, or SEO, this tool can help you quickly di
 ### General setup (all setup options)
 1. [Clone a local copy of this repository](https://docs.github.com/en/repositories/creating-and-managing-repositories/cloning-a-repository) to your computer and/or a server, depending on your chosen setup (detailed below).
 2. Create a new `config.py` file in the /app/ subdirectory. Copy the contents of `example_config.py` into `config.py`. Edit the `PATH` variable to reference the location of the project root directory.
-3. Install all requirements (specific versions of Python and packages) using the [Pipfile](/Pipfile). For more information, please read the [Pipenv documentation](https://pipenv.pypa.io/en/latest/).
+3. Install all requirements (specific versions of Python and packages) using the [uv package manager](https://docs.astral.sh/uv/guides/projects/) or another tool of your choice (based on the [pyproject file](/pyproject.toml)).
 4. Create a "monitored_sites.csv" file in the top-level directory (which contains the README file). Populate the file with a header row (column labels) and details of the website(s) you want to monitor, as defined below:
 - URL (column 1): the absolute URL of the website homepage, with a trailing slash.
 - Name (column 2): the website's name identifier (letters/numbers only).
