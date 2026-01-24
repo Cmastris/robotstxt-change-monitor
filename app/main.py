@@ -72,12 +72,6 @@ class RunChecks:
         self.sites = sites.copy()
         self.no_change, self.change, self.first_run, self.error = 0, 0, 0, 0
 
-        # If /data doesn't exist yet, create directory and main log file
-        if not os.path.isdir(config.PATH + 'data'):
-            os.mkdir(config.PATH + 'data')
-            f = open(config.MAIN_LOG, 'x')
-            f.close()
-
     def check_all(self):
         """Run robots.txt checks and reports for all sites."""
         start_content = "Starting checks on {} sites.".format(len(self.sites))
@@ -493,11 +487,16 @@ class ErrorReport(Report):
 def main():
     """Run all checks and handle fatal errors."""
     try:
+        # Create /data and main log file if they don't already exist
+        if not os.path.isdir(config.PATH + 'data'):
+            os.mkdir(config.PATH + 'data')
+            f = open(config.MAIN_LOG, 'x')
+            f.close()
+        
         sites_data = sites_from_file(config.MONITORED_SITES)
         RunChecks(sites_data).check_all()
 
     except Exception as fatal_err:
-        # Fatal error during CSV read or RunChecks
         fatal_err_msg = logs.get_err_str(fatal_err, "Fatal error.")
         logs.log_error(fatal_err_msg)
 
