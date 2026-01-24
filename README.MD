@@ -14,7 +14,7 @@ Whether you're a webmaster, developer, or SEO, this tool can help you quickly di
     - [Local with emails disabled](#local-with-emails-disabled)
     - [Local with emails enabled](#local-with-emails-enabled)
     - [Server with emails enabled](#server-with-emails-enabled)
-  - [Testing](#testing)
+  - [Logging and tests](#logging-and-tests)
 - [FAQs](#faqs)
   - [How can I ask questions, report bugs, or provide feedback?](#how-can-i-ask-questions-report-bugs-or-provide-feedback)
   - [What should I do if there's a connection error, non-200 status, or inaccurate content?](#what-should-i-do-if-theres-a-connection-error-non-200-status-or-inaccurate-content)
@@ -60,9 +60,9 @@ Note: remember to use your (activated) virtual environment or use [uv run](https
 #### Local with emails disabled
 *The quickest setup, suitable if you plan to run the tool on your computer for sites that you're personally monitoring (or are otherwise willing to notify other people about changes/errors manually).*
 
-1. Run `main.py` (in the /app/ subdirectory). The results should be printed to the console and the data/logs should be saved in a newly created /data/ directory.
+1. Run `main.py` (in the /app/ subdirectory). The results should be printed to the console and the data/logs should be saved in a newly created /data subdirectory in the project root directory.
    
-2. Run `main.py` again whenever you want to re-check the robots.txt files. It's recommended that you check the print output or main log regularly, or at least after new sites are added, in case there are any unexpected errors.
+2. Run `main.py` again whenever you want to re-check the robots.txt files.
 
 #### Local with emails enabled
 *More setup, suitable if you plan to run the tool on your computer for yourself and others.*
@@ -74,9 +74,9 @@ Note: remember to use your (activated) virtual environment or use [uv run](https
 
 2. Implement email sending functionality in `emails.py` (in the /app/ subdirectory) within the `send_emails()` function stub. The function stub receives all pre-created email content (as defined in the function docstring) and includes generic exception (uncaught error) handling, but it will be up to you to implement the sending of emails using your chosen package/library/email service.
 
-3. Run `main.py`. The results should be printed to the console and the data/logs should be saved in a newly created /data/ directory. Check that emails are being sent/received as intended.
+3. Run `main.py`. The results should be printed to the console and the data/logs should be saved in a newly created /data subdirectory in the project root directory. Check that emails are being sent/received as intended.
 
-4. Run `main.py` again whenever you want to re-check the robots.txt files. It's recommended that you check the print output or main log regularly, or at least after new sites are added, in case there are any unexpected errors.
+4. Run `main.py` again whenever you want to re-check the robots.txt files.
 
 #### Server with emails enabled
 *The most setup for a fully automated experience.*
@@ -85,14 +85,16 @@ Refer to ["Local with emails enabled"](#local-with-emails-enabled), with the fol
 - You may need to refer to your server's documentation for details of setting up a cron job to regularly run `main.py`.
 - You may need to edit the shebang line at the top of `main.py`.
 
-### Testing
-In general, errors will be reported/logged if anything is clearly breaking. However, it's a good idea to review the saved website(s) data (in the /data/ directory) after running the tool for the first and second time, to check that everything is looking correct.
+### Logging and tests
+Errors are logged if anything is clearly failing. However, given the unpredictability of web scraping (e.g. the tool being blocked or served a non-standard response), **it's sensible to review and verify the saved data/logs after running the tool for the first and second time for a given website**.
+
+Automated tests can be run using `pytest` from the project root directory (or by passing the root directory as an argument), to verify your setup and test the app following any code changes. Refer to the pytest documentation for more details.
 
 
 ## FAQs
 
 ### How can I ask questions, report bugs, or provide feedback?
-Feel free to create an issue or open a new discussion.
+Please create an issue or open a new discussion via the GitHub repository.
 
 ### What should I do if there's a connection error, non-200 status, or inaccurate content?
 If the tool repeatedly reports an error or inaccurate robots.txt content for a site, but you're able to view the file via your browser, this is likely due to an invalid URL format or the tool being blocked in some way. 
@@ -104,6 +106,6 @@ Try the following:
 4. Troubleshoot with your IT/development teams.
 
 ### Is this project in active development?
-There are no major updates/features planned and I'm not looking for any substantial contributions (but you're welcome to fork your own version).
-
-However, I plan to maintain the project by periodically upgrading to newer (actively supported) versions of Python/Requests and fixing any significant bugs.
+There are no major updates/features planned and I'm not looking for any substantial contributions (but you're welcome to fork your own version). However, I plan to maintain the project by:
+- Periodically upgrading to newer versions of Python and the project's dependencies (when older versions become unsupported and/or have security vulnerabilities)
+- Fixing any significant bugs
