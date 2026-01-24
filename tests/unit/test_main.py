@@ -1,11 +1,11 @@
-import app.config as config
-from app.main import sites_from_file
+def test_sites_from_file(monkeypatch):
+    # Use modified test path (i.e. test CSV) in config.py
+    monkeypatch.setenv("ROBOTS_MONITOR_ENV", "test")
 
+    import app.config as config
+    from app.main import sites_from_file
 
-def test_sites_from_file():
-    
-    test_csv = config.PATH + r"tests\test_data" + "\\" + "test_monitored_sites.csv"
-    sites_data = sites_from_file(test_csv)
+    sites_data = sites_from_file(config.MONITORED_SITES)
 
     expected_sites_data = [
         ['http://www.reddit.com/', 'Reddit HTTP', ''],

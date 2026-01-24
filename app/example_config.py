@@ -1,5 +1,14 @@
+import os
+
 # The absolute path of the project root directory
 PATH = r'C:\Users\ExampleUser\python\robotstxt-change-monitor' + '\\'
+
+# Get app environment if set, otherwise "prod"
+ENV = os.getenv("ROBOTS_MONITOR_ENV", "prod")
+
+if ENV == "test":
+  # Use test sites, logging etc.
+  PATH += r"tests\test_data" + "\\"
 
 # The location of the monitored sites CSV file
 # Refer to the main.py `sites_from_file()` function documentation for more details
@@ -18,6 +27,9 @@ SENDER_EMAIL = "SENDER_EMAIL@example.com"
 # Toggle ('True' or 'False') whether emails are enabled (both site admins and the program admin)
 # This requires implementing email sending functionality in the emails.py `send_emails()` function
 EMAILS_ENABLED = False
+
+if ENV == "test":
+  EMAILS_ENABLED = False
 
 # User-agent string sent in request headers
 USER_AGENT = "Robots.txtMonitor/1.0"

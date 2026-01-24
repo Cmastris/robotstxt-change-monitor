@@ -2,7 +2,7 @@
 /data
 
 # Data input file
-monitored_sites.csv
+/monitored_sites.csv
 
 # Config file
 config.py
