@@ -1,5 +1,6 @@
 # Robots.txt record files and log files
 /data
+/tests/test_data/data
 
 # Data input file
 /monitored_sites.csv
