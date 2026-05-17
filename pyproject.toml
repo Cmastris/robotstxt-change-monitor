@@ -5,10 +5,10 @@ description = "Monitor and report changes across one or more robots.txt files."
 readme = "README.md"
 requires-python = ">=3.11.15,<3.12"
 dependencies = [
-    "requests==2.33.0",
+    "requests==2.34.2",
 ]
 
 [dependency-groups]
 dev = [
-    "pytest==9.0.2",
+    "pytest==9.0.3",
 ]
