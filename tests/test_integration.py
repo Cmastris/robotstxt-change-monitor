@@ -9,7 +9,7 @@ def get_previous_minute_timestamp():
     return previous_min.strftime("%d-%m-%y, %H:%M")
 
 
-def test_app_runs_without_crash(monkeypatch):
+def test_app_runs_without_fatal_error(monkeypatch):
     """End-to-end test in the test directory.
     
     Tests the absence of fatal errors but doesn't inspect 
@@ -18,8 +18,25 @@ def test_app_runs_without_crash(monkeypatch):
     # Use modified testing variables in config.py
     monkeypatch.setenv("ROBOTS_MONITOR_ENV", "test")
 
+    # Import after monkeypatch
     from app.main import main
+    from app.config import MAIN_LOG
+    from app.logs import get_timestamp
+
     main()
+
+    # Log timestamps should contain the current minute or the minute before
+    timestamp_now = get_timestamp()
+    timestamp_prev_minute = get_previous_minute_timestamp()
+
+    # Retrieve main log summary line (if not fatal error)
+    with open(MAIN_LOG, 'r') as f:
+        main_log_summary = f.readlines()[-4]
+
+    # Check that the most recent log summary is for the recent run
+    # and that the main log summary is present
+    assert (timestamp_now in main_log_summary) or (timestamp_prev_minute in main_log_summary)
+    assert "Checks and reports complete" in main_log_summary
 
 
 def test_no_change(monkeypatch):
