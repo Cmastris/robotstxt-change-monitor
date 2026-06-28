@@ -141,3 +141,82 @@ def test_no_change(monkeypatch):
     
     expected_main_log_summary = "No change: 1. Change: 0. First run: 0. Error: 0."
     assert expected_main_log_summary in main_log_summary
+
+
+def test_change(monkeypatch):
+    """Tests behaviour/output if there is a robots.txt change."""
+    # Use modified testing variables in config.py
+    monkeypatch.setenv("ROBOTS_MONITOR_ENV", "test")
+    
+    # Import after monkeypatch
+    from app.main import main
+    from app.config import MAIN_LOG, PATH
+    from app.logs import get_timestamp
+
+    # Check a single site
+    site_dir = PATH + "data/www.gov.uk"
+    def mock_sites_from_file(file):
+        return [['https://www.gov.uk/', 'Gov UK', ''],]
+
+    monkeypatch.setattr("app.main.sites_from_file", mock_sites_from_file)
+
+    # Delete the existing site directory to simulate a new site
+    if os.path.isdir(site_dir):
+        shutil.rmtree(site_dir)
+
+    # Generate the directories & files for a first run
+    main()
+
+    # Rename the first run snapshot file to avoid an error when trying to create 
+    # another (change) snapshot file with the same timestamp and to make it easier
+    # to identify/check the change snapshot file
+    snapshots_dir = site_dir + "/snapshots/"
+    filename = os.listdir(snapshots_dir)[0]
+    original_path = snapshots_dir + filename
+    new_path = snapshots_dir + "Robots.txt Snapshot First Run.txt"
+    os.rename(original_path, new_path)
+
+    # Modify new_file.txt to simulate a change and then re-run the check
+    with open(site_dir + "/program_files/new_file.txt", 'a') as f:
+        f.write("\nSimulating some extra content in the original file!")
+    
+    main()  # Should detect a change, i.e. the loss of the added content
+
+    # Log timestamps should contain the current minute or the minute before
+    timestamp_now = get_timestamp()
+    timestamp_prev_minute = get_previous_minute_timestamp()
+
+    # Retrieve log summary lines
+    with open(site_dir + "/log.txt", 'r') as f:
+        site_log_summary = f.readlines()[-1]
+
+    with open(MAIN_LOG, 'r') as f:
+        main_log_summary = f.readlines()[-4]
+
+    # Check that the most recent log summaries are for the recent run
+    assert (timestamp_now in site_log_summary) or (timestamp_prev_minute in site_log_summary)
+    assert (timestamp_now in main_log_summary) or (timestamp_prev_minute in main_log_summary)
+
+    # Check that the log summaries are accurate
+    expected_site_log_summary = "Change: https://www.gov.uk/. " \
+                                "Change detected in the robots.txt file"
+    assert expected_site_log_summary in site_log_summary
+    
+    expected_main_log_summary = "No change: 0. Change: 1. First run: 0. Error: 0."
+    assert expected_main_log_summary in main_log_summary
+
+    # Check that snapshot and diff files were created
+    sorted_snapshots = sorted(os.listdir(snapshots_dir))
+
+    assert "Robots.txt Snapshot.txt" in sorted_snapshots[1]
+    with open(snapshots_dir + sorted_snapshots[1], 'r') as f:
+        snapshot_text = f.read()
+
+    assert len(snapshot_text) > 1
+
+    assert "Robots.txt Diff.html" in sorted_snapshots[0]
+    with open(snapshots_dir + sorted_snapshots[0], 'r', encoding='utf-8') as f:
+        diff_html = f.read()
+
+    assert len(diff_html) > 1
+    assert '<span class="diff_sub">Simulating' in diff_html
