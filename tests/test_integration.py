@@ -220,3 +220,46 @@ def test_change(monkeypatch):
 
     assert len(diff_html) > 1
     assert '<span class="diff_sub">Simulating' in diff_html
+
+
+def test_check_error(monkeypatch):
+    """Tests behaviour/output if a robots.txt check results in an error."""
+    # Use modified testing variables in config.py
+    monkeypatch.setenv("ROBOTS_MONITOR_ENV", "test")
+    
+    # Import after monkeypatch
+    from app.main import main
+    from app.config import MAIN_LOG, PATH
+    from app.logs import get_timestamp
+
+    # Check a single site
+    def mock_sites_from_file(file):
+        return [['http://www.goodreads.com/', 'Goodreads HTTP', ''],]
+
+    monkeypatch.setattr("app.main.sites_from_file", mock_sites_from_file)
+
+    # Run check against HTTP URL, which should return a non-200 status code
+    # and cause the check to fail (report an error)
+    main()
+
+    # Log timestamps should contain the current minute or the minute before
+    timestamp_now = get_timestamp()
+    timestamp_prev_minute = get_previous_minute_timestamp()
+
+    # Retrieve log summary lines
+    with open(PATH + "data/www.goodreads.com/log.txt", 'r') as f:
+        site_log_summary = f.readlines()[-1]
+
+    with open(MAIN_LOG, 'r') as f:
+        main_log_summary = f.readlines()[-4]
+
+    # Check that the most recent log summaries are for the recent run
+    assert (timestamp_now in site_log_summary) or (timestamp_prev_minute in site_log_summary)
+    assert (timestamp_now in main_log_summary) or (timestamp_prev_minute in main_log_summary)
+
+    # Check that the log summaries are accurate
+    expected_site_log_summary = "Error: http://www.goodreads.com/."
+    assert expected_site_log_summary in site_log_summary
+    
+    expected_main_log_summary = "No change: 0. Change: 0. First run: 0. Error: 1."
+    assert expected_main_log_summary in main_log_summary
