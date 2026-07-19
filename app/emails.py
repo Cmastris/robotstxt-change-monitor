@@ -67,7 +67,7 @@ def save_unsent_email(address, subject, body):
     if not os.path.isdir(unsent_dir):
         os.mkdir(unsent_dir)
 
-    file_name = logs.get_timestamp(str_format="%d-%m-%y T %H-%M-%S") + ".txt"
+    file_name = logs.get_timestamp(str_format="%Y-%m-%d %H%M") + ".txt"
     with open(unsent_dir + "/" + file_name, 'x') as f:
         f.write(address + "\n\n" + subject + "\n\n" + body)
 

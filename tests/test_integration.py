@@ -8,7 +8,7 @@ def get_previous_minute_timestamp():
     previous_min = datetime.datetime.now() - datetime.timedelta(minutes=1)
 
     # Formatting copied from logs.get_timestamp()
-    return previous_min.strftime("%d-%m-%y, %H:%M")
+    return previous_min.strftime("%Y-%m-%d %H:%M")
 
 
 def test_app_runs_without_fatal_error(monkeypatch):

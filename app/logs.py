@@ -92,8 +92,8 @@ def update_main_log(message, blank_before=False, timestamp=True):
 
 
 @unexpected_exception_handling
-def get_timestamp(str_format="%d-%m-%y, %H:%M"):
-    """Return the current time as a string (default: 'day-month-year, hour:minute').
+def get_timestamp(str_format="%Y-%m-%d %H:%M"):
+    """Return the current time as a string (default: 'year-month-day hour:minute').
 
     Args:
         str_format (str): a valid 'datetime.datetime.strftime' format.

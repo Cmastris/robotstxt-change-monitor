@@ -341,7 +341,8 @@ class Report:
         self.new_content = website.new_content
         self.name = name
         self.email = email
-        self.timestamp = logs.get_timestamp()
+        self.log_timestamp = logs.get_timestamp()
+        self.file_timestamp = self.log_timestamp.replace(":", "")
 
     def __str__(self):
         return "{} - {}".format(type(self).__name__, self.url)
@@ -353,12 +354,12 @@ class Report:
 
         # Create file if it doesn't exist, otherwise append content to the end
         with open(log_file, 'a+') as f:
-            f.write("{}: {}\n".format(self.timestamp, message))
+            f.write("{}: {}\n".format(self.log_timestamp, message))
 
     @logs.unexpected_exception_handling
     def create_snapshot(self):
         """Create and return the location of a text file containing the latest content."""
-        file_name = self.timestamp.replace(",", " T").replace(":", "-") + " Robots.txt Snapshot.txt"
+        file_name = self.file_timestamp + " Robots.txt Snapshot.txt"
         snapshot_file = self.dir + "/snapshots/" + file_name
         if not os.path.isdir(self.dir + "/snapshots"):
             os.mkdir(self.dir + "/snapshots")
@@ -421,7 +422,7 @@ class ChangeReport(Report):
         new_list = self.new_content.split('\n')
         diff_html = difflib.HtmlDiff().make_file(old_list, new_list, "Previous", "New")
 
-        file_name = self.timestamp.replace(",", " T").replace(":", "-") + " Robots.txt Diff.html"
+        file_name = self.file_timestamp + " Robots.txt Diff.html"
         diff_file = self.dir + "/snapshots/" + file_name
         if not os.path.isdir(self.dir + "/snapshots"):
             os.mkdir(self.dir + "/snapshots")
