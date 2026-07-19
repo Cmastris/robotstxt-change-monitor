@@ -3,6 +3,14 @@ import os
 import shutil
 
 
+def get_main_log_summary(main_log_path):
+    """Return the latest main log summary line (if no fatal error)."""
+    with open(main_log_path, 'r') as f:
+        main_log_summary = f.readlines()[3]
+
+    return main_log_summary
+
+
 def get_previous_minute_timestamp():
     """Return a timestamp for the previous minute."""
     previous_min = datetime.datetime.now() - datetime.timedelta(minutes=1)
@@ -31,9 +39,8 @@ def test_app_runs_without_fatal_error(monkeypatch):
     timestamp_now = get_timestamp()
     timestamp_prev_minute = get_previous_minute_timestamp()
 
-    # Retrieve main log summary line (if not fatal error)
-    with open(MAIN_LOG, 'r') as f:
-        main_log_summary = f.readlines()[-4]
+    # Retrieve the latest main log summary line (if not fatal error)
+    main_log_summary = get_main_log_summary(MAIN_LOG)
 
     # Check that the most recent log summary is for the recent run
     # and that the main log summary is present
@@ -70,10 +77,9 @@ def test_first_run(monkeypatch):
 
     # Retrieve log summary lines
     with open(site_dir + "/log.txt", 'r') as f:
-        site_log_summary = f.readlines()[-1]
+        site_log_summary = f.readlines()[0]
 
-    with open(MAIN_LOG, 'r') as f:
-        main_log_summary = f.readlines()[-4]
+    main_log_summary = get_main_log_summary(MAIN_LOG)
 
     # Check that the most recent log summaries are for the recent run
     assert (timestamp_now in site_log_summary) or (timestamp_prev_minute in site_log_summary)
@@ -125,10 +131,9 @@ def test_no_change(monkeypatch):
 
     # Retrieve log summary lines
     with open(PATH + "data/github.com/log.txt", 'r') as f:
-        site_log_summary = f.readlines()[-1]
+        site_log_summary = f.readlines()[0]
 
-    with open(MAIN_LOG, 'r') as f:
-        main_log_summary = f.readlines()[-4]
+    main_log_summary = get_main_log_summary(MAIN_LOG)
 
     # Check that the most recent log summaries are for the recent run
     assert (timestamp_now in site_log_summary) or (timestamp_prev_minute in site_log_summary)
@@ -188,10 +193,9 @@ def test_change(monkeypatch):
 
     # Retrieve log summary lines
     with open(site_dir + "/log.txt", 'r') as f:
-        site_log_summary = f.readlines()[-1]
+        site_log_summary = f.readlines()[0]
 
-    with open(MAIN_LOG, 'r') as f:
-        main_log_summary = f.readlines()[-4]
+    main_log_summary = get_main_log_summary(MAIN_LOG)
 
     # Check that the most recent log summaries are for the recent run
     assert (timestamp_now in site_log_summary) or (timestamp_prev_minute in site_log_summary)
@@ -248,10 +252,9 @@ def test_check_error(monkeypatch):
 
     # Retrieve log summary lines
     with open(PATH + "data/www.goodreads.com/log.txt", 'r') as f:
-        site_log_summary = f.readlines()[-1]
+        site_log_summary = f.readlines()[0]
 
-    with open(MAIN_LOG, 'r') as f:
-        main_log_summary = f.readlines()[-4]
+    main_log_summary = get_main_log_summary(MAIN_LOG)
 
     # Check that the most recent log summaries are for the recent run
     assert (timestamp_now in site_log_summary) or (timestamp_prev_minute in site_log_summary)

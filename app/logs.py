@@ -1,5 +1,6 @@
 import datetime
 import functools
+import os
 import traceback
 
 import config
@@ -66,25 +67,34 @@ def log_error(error_message, print_err=True, log_in_main=True, in_admin_email=Tr
         admin_email_errors.append(error_message)
 
 
-def update_main_log(message, blank_before=False, timestamp=True):
+def prepend_to_file(file_path, content):
+    """Prepend content (str) to a new line of a file at a specified path (str)."""
+    existing_content = ""
+    if os.path.exists(file_path):
+        with open(file_path, 'r') as f:
+            existing_content = f.read()
+
+    with open(file_path, 'w') as f:
+        f.write(content + "\n" + existing_content)
+
+
+def update_main_log(message, blank_after=False, include_timestamp=True):
     """Update the 'config.MAIN_LOG' text file with a single message.
 
     Args:
-        message (str): the message content to be logged.
-        blank_before (bool): whether a blank line is added before the message (default=False).
-        timestamp (bool): whether the message starts with a timestamp (default=True).
+        message (str): the message content (excluding timestamp) to be logged.
+        blank_after (bool): whether a blank line is added after the message.
+        include_timestamp (bool): whether the message should start with a timestamp.
 
     """
     try:
-        message = message + "\n"
-        if timestamp:
+        if include_timestamp:
             message = get_timestamp() + ": " + message
 
-        if blank_before:
-            message = "\n" + message
+        if blank_after:
+            message = message + "\n"
 
-        with open(config.MAIN_LOG, 'a') as f:
-            f.write(message)
+        prepend_to_file(config.MAIN_LOG, message)
 
     except Exception as e:
         err_msg = get_err_str(e, "Error when updating the main log.")

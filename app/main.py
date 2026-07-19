@@ -86,7 +86,7 @@ class RunChecks:
                   "Error: {}.".format(self.no_change, self.change, self.first_run, self.error)
 
         print("\n" + summary)
-        logs.update_main_log(summary, blank_before=True)
+        logs.update_main_log(summary, blank_after=True)
         emails.send_emails(emails.site_emails)
 
         email_subject = "Robots.txt Checks Complete"
@@ -351,10 +351,10 @@ class Report:
     def update_site_log(self, message):
         """Update the site log text file with a single message (str)."""
         log_file = self.dir + "/log.txt"
+        entry = "{}: {}".format(self.log_timestamp, message)
 
-        # Create file if it doesn't exist, otherwise append content to the end
-        with open(log_file, 'a+') as f:
-            f.write("{}: {}\n".format(self.log_timestamp, message))
+        # Prepend the new entry or create file if it doesn't exist
+        logs.prepend_to_file(log_file, entry)
 
     @logs.unexpected_exception_handling
     def create_snapshot(self):
@@ -514,7 +514,8 @@ def main():
         else:
             print("Note: the sending of emails is disabled in config.py.")
 
-        logs.update_main_log("\n{}END OF RUN{}\n".format("-"*20, "-"*20), timestamp=False)
+        end_line = "\n{}END OF RUN{}\n".format("-"*20, "-"*20)
+        logs.update_main_log(end_line, include_timestamp=False)
 
 
 if __name__ == "__main__":
